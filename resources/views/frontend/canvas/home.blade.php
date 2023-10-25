@@ -63,7 +63,7 @@
 
 				</div>
 
-				<div class="row bottommargin-lg align-items-stretch">
+				<div class="row align-items-stretch">
 
 					<div class="col-lg-4 dark col-padding overflow-hidden" style="background-color: #1abc9c;">
 						<div>
@@ -141,7 +141,7 @@
 
 				<!-- Portfolio Items
 				============================================= -->
-				<div id="portfolio" class="portfolio row g-0 portfolio-reveal grid-container">
+				<div id="portfolio" class="portfolio row bottommargin-lg g-0 portfolio-reveal grid-container">
 				@foreach(latestGallery(8) as $latestGallery)
 					<article class="portfolio-item col-6 col-md-4 col-lg-3 pf-media pf-icons">
 						<div class="grid-inner">
