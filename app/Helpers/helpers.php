@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Tag;
 use App\Models\Post;
 use App\Models\Pages;
 use App\Models\Gallery;
@@ -26,6 +27,56 @@ if (!function_exists('getPicture')) {
 				return asset(Storage::url('gallery/'.$name));
 			} else {
 				return asset(Storage::url('gallery/'.$name));
+			}
+		}
+	}
+}
+
+if (!function_exists('getPicturepost')) {
+	function getPicturepost($name, $type, $user)
+    {
+		if ($type == 'medium') {
+			if (file_exists('po-content/uploads/medium/medium_'.$name)) {
+				return asset('po-content/uploads/medium/medium_'.$name);
+			} else {
+				return asset('po-content/uploads/users/user-'.$user.'/medium/medium_'.$name);
+			}
+		} elseif ($type == 'thumb') {
+			if (file_exists(Storage::url('post/thumbnail/'.$name))) {
+				return asset(Storage::url('post/thumbnail/'.$name));
+			} else {
+				return asset(Storage::url('post/thumbnail/'.$name));
+			}
+		} else {
+			if (file_exists(Storage::url('post/'.$name))) {
+				return asset(Storage::url('post/'.$name));
+			} else {
+				return asset(Storage::url('post/'.$name));
+			}
+		}
+	}
+}
+
+if (!function_exists('getPicturepages')) {
+	function getPicturepages($name, $type, $user)
+    {
+		if ($type == 'medium') {
+			if (file_exists('po-content/uploads/medium/medium_'.$name)) {
+				return asset('po-content/uploads/medium/medium_'.$name);
+			} else {
+				return asset('po-content/uploads/users/user-'.$user.'/medium/medium_'.$name);
+			}
+		} elseif ($type == 'thumb') {
+			if (file_exists(Storage::url('pages/thumbnail/'.$name))) {
+				return asset(Storage::url('pages/thumbnail/'.$name));
+			} else {
+				return asset(Storage::url('pages/thumbnail/'.$name));
+			}
+		} else {
+			if (file_exists(Storage::url('pages/'.$name))) {
+				return asset(Storage::url('pages/'.$name));
+			} else {
+				return asset(Storage::url('pages/'.$name));
 			}
 		}
 	}

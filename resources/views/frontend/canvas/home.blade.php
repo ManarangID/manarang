@@ -45,7 +45,7 @@
 
 				<div class="clear"></div>
 
-				<div class="section parallax dark mb-0 border-bottom-0" style="background-image: url('images/parallax/7.jpg');" data-bottom-top="background-position:0px 0px;" data-top-bottom="background-position:0px -300px;">
+				<div class="section parallax dark mb-0 border-bottom-0" style="background-image: url({{ Storage::url('images/parallax.jpg') }});" data-bottom-top="background-position:0px 0px;" data-top-bottom="background-position:0px -300px;">
 
 					<div class="container clearfix">
 
@@ -235,45 +235,52 @@
 							</div>
 
 							<div class="row posts-md col-mb-30">
+							@foreach(latestPost(1,0) as $latestPost1)
 								<div class="entry col-md-6">
 									<div class="grid-inner">
 										<div class="entry-image">
-											<a href="#"><img src="images/magazine/thumb/11.jpg" alt="Image"></a>
+											<a href="{{ prettyUrl($latestPost1) }}"><img src="{{ getPicturepost($latestPost1->picture, '', $latestPost1->updated_by) }}" alt="{{ $latestPost1->title }}"></a>
 										</div>
 										<div class="entry-title title-sm nott">
-											<h3><a href="blog-single.html">Toyotas next minivan will let you shout at your kids without turning around</a></h3>
+											<h3><a href="{{ prettyUrl($latestPost1) }}">{{ $latestPost1->title }}</a></h3>
 										</div>
 										<div class="entry-meta">
 											<ul>
-												<li><i class="icon-calendar3"></i> 10th Feb 2021</li>
-												<li><a href="blog-single.html#comments"><i class="icon-comments"></i> 13</a></li>
+												<li><i class="icon-calendar3"></i> {{ date('d F Y' , strtotime($latestPost1->created_at)) }}</li>
+												<li><a href="{{ prettyUrl($latestPost1) }}#comments"><i class="icon-comments"></i> 13</a></li>
+												<li><a href="{{ prettyUrl($latestPost1) }}"><i class="icon-eyes"></i> {{ $latestPost1->hits }} Views</a></li>
 											</ul>
 										</div>
 										<div class="entry-content">
-											<p>Medecins du Monde eradicate sustainability free expression contribution assessment expert humanitarian relief.</p>
+											<p>{{ \Str::limit(strip_tags($latestPost1->content), 150) }}</p>
 										</div>
 									</div>
 								</div>
+							@endforeach
 
+								
+							@foreach(latestPost(1,1) as $latestPost2)
 								<div class="entry col-md-6">
 									<div class="grid-inner">
 										<div class="entry-image">
-											<a href="#"><img src="images/magazine/thumb/14.jpg" alt="Image"></a>
+											<a href="{{ prettyUrl($latestPost2) }}"><img src="{{ getPicturepost($latestPost2->picture, '', $latestPost2->updated_by) }}" alt="{{ $latestPost2->title }}"></a>
 										</div>
 										<div class="entry-title title-sm nott">
-											<h3><a href="blog-single.html">UK government weighs Tesla's Model S for its ??5 million electric vehicle fleet</a></h3>
+											<h3><a href="{{ prettyUrl($latestPost2) }}">{{ $latestPost2->title }}</a></h3>
 										</div>
 										<div class="entry-meta">
 											<ul>
-												<li><i class="icon-calendar3"></i> 10th Feb 2021</li>
-												<li><a href="blog-single.html#comments"><i class="icon-comments"></i> 13</a></li>
+												<li><i class="icon-calendar3"></i> {{ date('d F Y' , strtotime($latestPost2->created_at)) }}</li>
+												<li><a href="{{ prettyUrl($latestPost2) }}#comments"><i class="icon-comments"></i> 13</a></li>
+												<li><a href="{{ prettyUrl($latestPost2) }}"><i class="icon-eyes"></i> {{ $latestPost2->hits }} Views</a></li>
 											</ul>
 										</div>
 										<div class="entry-content">
-											<p>Urban public institutions life-saving women and children Rockefeller combat malaria honesty. Sustainability foster immunize treatment.</p>
+											<p>{{ \Str::limit(strip_tags($latestPost2->content), 150) }}</p>
 										</div>
 									</div>
 								</div>
+							@endforeach
 							</div>
 						</div>
 
@@ -329,11 +336,11 @@
 								<div class="card-body">
 									<h4>Opening Hours</h4>
 
-									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit reprehenderit voluptates.</p>
+									<p>Hubungi kami di jam operasional berikut</p>
 
 									<ul class="iconlist mb-0">
-										<li><i class="icon-time color"></i> <strong>Mondays-Fridays:</strong> 10AM to 7PM</li>
-										<li><i class="icon-time color"></i> <strong>Saturdays:</strong> 11AM to 3PM</li>
+										<li><i class="icon-time color"></i> <strong>Mondays-Fridays:</strong> 9AM to 4PM</li>
+										<li><i class="icon-time color"></i> <strong>Saturdays:</strong> 10AM to 3PM</li>
 										<li><i class="icon-time text-danger"></i> <strong>Sundays:</strong> Closed</li>
 									</ul>
 
@@ -352,12 +359,18 @@
 							<h3>Subscribe to our <span>Newsletter</span></h3>
 						</div>
 
-						<div class="subscribe-widget">
-							<div class="widget-subscribe-form-result"></div>
-							<form id="widget-subscribe-form2" action="include/subscribe.php" method="post" class="mb-0">
+						<div class="">
+							
+							<form action="{{ route('subscribe') }}" method="post" class="mb-0">
+								@csrf
+								@if (session('subscribed'))
+								<div class="alert alert-success">
+									{{ session('subscribed') }}
+								</div>
+								@endif
 								<div class="input-group input-group-lg mx-auto" style="max-width:600px;">
 									<div class="input-group-text"><i class="icon-email2"></i></div>
-									<input type="email" name="widget-subscribe-form-email" class="form-control required email" placeholder="Enter your Email">
+									<input type="email" name="email" class="form-control required email" placeholder="Enter your Email">
 									<button class="btn btn-secondary" type="submit">Subscribe Now</button>
 								</div>
 							</form>

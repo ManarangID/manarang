@@ -9,7 +9,7 @@
 						<!-- Logo
 						============================================= -->
 						<div id="logo">
-						<a href="index.html" class="standard-logo" data-dark-logo="{{ Storage::url('images/'.getSetting('logo')) }}"><img src="{{ Storage::url('images/'.getSetting('logo')) }}" alt="{{ getSetting('web_name') }}"></a>
+						<a href="index.html" class="standard-logo" data-dark-logo="{{ Storage::url('images/'.getSetting('logo')) }}"><img src="{{ Storage::url('images/'.getSetting('logo')) }}" width="126" alt="{{ getSetting('web_name') }}"></a>
 							<a href="index.html" class="retina-logo" data-dark-logo="{{ Storage::url('images/logo.png') }}"><img src="{{ Storage::url('images/logo.png') }}" alt="{{ getSetting('web_url') }}"></a>
 						</div><!-- #logo end -->
 
@@ -37,7 +37,7 @@
 							</div>
 							@else
 							<div id="top-cart" class="header-misc-icon d-none d-sm-block">
-								<a href="/login" id="top-cart-trigger"><i class="icon-signin"></i></a>
+								<a href="/login" ><i class="icon-signin"></i></a>
 							</div><!-- #top-cart end -->
 							@endauth
 							@endif
