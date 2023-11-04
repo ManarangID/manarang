@@ -105,3 +105,5 @@ Route::controller(GoogleController::class)->group(function(){
 });
 Route::get('posts/{seotitle}', [PostController::class, 'show'])->name('posts.show');
 Route::get('pages/{seotitle}', [PagesController::class, 'detail'])->name('pages.detail');
+Route::get('category/{seotitle}', [CategoriesController::class, 'show'])->name('categories.show');
+

@@ -3,6 +3,7 @@
 use App\Models\Tag;
 use App\Models\Post;
 use App\Models\Pages;
+use App\Models\Theme;
 use App\Models\Gallery;
 use App\Models\Setting;
 use App\Models\Categories;
