@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pages', function (Blueprint $table) {
+        Schema::create('contacts', function (Blueprint $table) {
             $table->increments('id');
-			$table->string('title')->nullable();
-			$table->string('seotitle')->nullable();
-			$table->text('content')->nullable();
-			$table->string('picture')->nullable();
-			$table->enum('active', ['Y', 'N'])->default('Y');
+			$table->string('name')->nullable();
+			$table->string('email')->nullable();
+			$table->string('subject')->nullable();
+			$table->string('message')->nullable();
+			$table->enum('status', ['Y', 'N'])->default('N');
 			$table->integer('created_by')->default('1');
 			$table->integer('updated_by')->default('1');
             $table->timestamps();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pages');
+        Schema::dropIfExists('contacts');
     }
 };

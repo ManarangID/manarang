@@ -11,8 +11,9 @@ use Illuminate\Http\Response;
 use App\Http\Requests\PagesRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
-use Intervention\Image\Facades\Image as ResizeImage;
+use Artesaos\SEOTools\Facades\SEOTools;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image as ResizeImage;
 
 class PagesController extends Controller
 {
@@ -67,21 +68,6 @@ class PagesController extends Controller
         Pages::create($validated); 
         
         return redirect(route('pages'))->with('success', 'Added!');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function detail(string $seotitle): View
-    {
-        $pages = Pages::whereSeotitle($seotitle)->first();
-        if ($pages && $pages->active != 'N'){
-            $users = User::findOrFail($pages->created_by);
-            Pages::where('id', $pages->id)->increment('hits');
-            return view('frontend.canvas.pages', ['pages' => $pages, 'users' => $users]);
-        }else{
-            return abort(404);
-        }
     }
 
     /**
@@ -159,19 +145,6 @@ class PagesController extends Controller
     }
 
     /**
-     * Likes generate.
-     */
-    public function likes(Request $request, string $id)
-    {
-
-        //get pages by ID
-        $pages = Pages::findOrFail($id);
-        //Increment likes value
-        Pages::where('id', $id)->increment('likes');
-        return back()->withFragment('#likes');
-    }
-
-    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id): RedirectResponse
@@ -185,4 +158,41 @@ class PagesController extends Controller
 
         return redirect(route('pages'))->with('error', 'Sorry, unable to delete this!');
     }
+
+    /**
+     * Show the application pages.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function show($seotitle)
+    {
+		$pages = Pages::where([['seotitle', '=', $seotitle],['active', '=', 'Y']])->first();
+		
+		if($pages) {
+			$twitterid = explode('/', getSetting('twitter'));
+			SEOTools::setTitle($pages->title.' - '.getSetting('web_name'));
+			SEOTools::setDescription(\Str::limit(strip_tags($pages->content), 200));
+			SEOTools::metatags()->setKeywords(explode(',', getSetting('web_keyword')));
+			SEOTools::setCanonical(getSetting('web_url') . '/pages/' . $pages->seotitle);
+			SEOTools::opengraph()->setTitle($pages->title.' - '.getSetting('web_name'));
+			SEOTools::opengraph()->setDescription(\Str::limit(strip_tags($pages->content), 200));
+			SEOTools::opengraph()->setUrl(getSetting('web_url') . '/pages/' . $pages->seotitle);
+			SEOTools::opengraph()->setSiteName(getSetting('web_author'));
+			SEOTools::opengraph()->addImage($pages->picture == '' ? asset('po-content/uploads/'.getSetting('logo')) : getPicture($pages->picture, null, $pages->updated_by));
+			SEOTools::twitter()->setSite('@'.$twitterid[count($twitterid)-1]);
+			SEOTools::twitter()->setTitle($pages->title.' - '.getSetting('web_name'));
+			SEOTools::twitter()->setDescription(\Str::limit(strip_tags($pages->content), 200));
+			SEOTools::twitter()->setUrl(getSetting('web_url') . '/pages/' . $pages->seotitle);
+			SEOTools::twitter()->setImage($pages->picture == '' ? asset('po-content/uploads/'.getSetting('logo')) : getPicture($pages->picture, null, $pages->updated_by));
+			SEOTools::jsonLd()->setTitle($pages->title.' - '.getSetting('web_name'));
+			SEOTools::jsonLd()->setDescription(\Str::limit(strip_tags($pages->content), 200));
+			SEOTools::jsonLd()->setType('WebPage');
+			SEOTools::jsonLd()->setUrl(getSetting('web_url') . '/pages/' . $pages->seotitle);
+			SEOTools::jsonLd()->setImage($pages->picture == '' ? asset('po-content/uploads/'.getSetting('logo')) : getPicture($pages->picture, null, $pages->updated_by));
+			
+			return view(getTheme('pages'), compact('pages'));
+		} else {
+			return redirect('404');
+		}
+	}
 }

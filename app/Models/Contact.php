@@ -7,18 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Theme extends Model
+class Contact extends Model
 {
     use HasFactory, LogsActivity;
-    
-    protected $guarded = [];
-
+	
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-                ->logOnly(['title', 'author','folder','active'])
+                ->logOnly(['title', 'active','content'])
                 ->setDescriptionForEvent(fn(string $eventName) => "This model has been {$eventName}")
-                ->useLogName('Theme');
+                ->useLogName('Post');
     }
 	
     /**
@@ -33,7 +31,7 @@ class Theme extends Model
      *
      * @var string
      */
-    protected $table = 'themes';
+    protected $table = 'contacts';
 
     /**
      * The database primary key value.
@@ -48,6 +46,18 @@ class Theme extends Model
      * @var array
      */
     protected $fillable = [
-		'title', 'author', 'folder', 'active', 'created_by', 'updated_by'
+		'name', 'email', 'subject', 'message', 'status', 'created_by', 'updated_by'
 	];
+	
+	public function createdBy()
+	{
+		return $this->belongsTo('App\Models\User', 'created_by');
+	}
+	
+	public function updatedBy()
+	{
+		return $this->belongsTo('App\Models\User', 'updated_by');
+	}
+	
+	protected static $logAttributes = ['*'];
 }

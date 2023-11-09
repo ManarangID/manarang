@@ -1,21 +1,5 @@
 <x-app-layout>
 
-		<!-- Page Title
-		============================================= -->
-		<section id="page-title" class="page-title-parallax include-header" style="background-image: url({{ Storage::url('images/page-title.jpg') }}); padding: 120px 0;" data-bottom-top="background-position:0px 300px;" data-top-bottom="background-position:0px -300px;">
-
-			<div class="container clearfix">
-				<h1 data-animate="fadeInUp">{{ $pages->title }}</h1>
-				<span data-animate="fadeInUp" data-delay="300">{{ getSetting('web_name') }} {{ getSetting('web_author') }}</span>
-				<ol class="breadcrumb">
-					<li class="breadcrumb-item"><a href="#">Home</a></li>
-					<li class="breadcrumb-item"><a href="#">Pages</a></li>
-					<li class="breadcrumb-item active" aria-current="page">{{ $pages->title }}</li>
-				</ol>
-			</div>
-
-		</section><!-- #page-title end -->
-
 		<!-- Content
 		============================================= -->
 		<section id="content">
@@ -35,7 +19,7 @@
 
 						<!-- Sidebar
 						============================================= -->
-						<livewire:sidebar />
+						@include(getTheme('widgets.sidebar'))
 						<!-- .sidebar end -->
 					</div>
 

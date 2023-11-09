@@ -26,7 +26,7 @@ return new class extends Migration
 			$table->enum('headline', ['Y', 'N'])->default('Y');
 			$table->enum('comment', ['Y', 'N'])->default('Y');
 			$table->integer('hits')->default('1');
-			$table->integer('likes')->default('1');
+            $table->string('slug')->unique();
 			$table->integer('created_by')->default('1');
 			$table->integer('updated_by')->default('1');
             $table->timestamps();

@@ -7,18 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Theme extends Model
+class Menu extends Model
 {
     use HasFactory, LogsActivity;
-    
-    protected $guarded = [];
-
+	
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-                ->logOnly(['title', 'author','folder','active'])
+                ->logOnly(['title', 'group','url'])
                 ->setDescriptionForEvent(fn(string $eventName) => "This model has been {$eventName}")
-                ->useLogName('Theme');
+                ->useLogName('Menu');
     }
 	
     /**
@@ -33,7 +31,7 @@ class Theme extends Model
      *
      * @var string
      */
-    protected $table = 'themes';
+    protected $table = 'menus';
 
     /**
      * The database primary key value.
@@ -48,6 +46,30 @@ class Theme extends Model
      * @var array
      */
     protected $fillable = [
-		'title', 'author', 'folder', 'active', 'created_by', 'updated_by'
+		'parent', 'group', 'title', 'url', 'class', 'target', 'position', 'created_by', 'updated_by'
 	];
+	
+	public function createdBy()
+	{
+		return $this->belongsTo('App\Models\User', 'created_by');
+	}
+	
+	public function updatedBy()
+	{
+		return $this->belongsTo('App\Models\User', 'updated_by');
+	}
+	
+	public function mainParent() {
+		return $this->hasOne('App\Models\Menu', 'id', 'parent')->orderBy('position');
+	}
+	
+	public function children() {
+		return $this->hasMany('App\Models\Menu', 'parent', 'id')->orderBy('position');
+	}
+	
+	public static function tree() {
+		return static::with(implode('.', array_fill(0, 100, 'children')))->where('parent', '=', '0')->orderBy('position')->get();
+	}
+	
+	protected static $logAttributes = ['*'];
 }

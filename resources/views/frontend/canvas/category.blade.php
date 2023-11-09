@@ -61,17 +61,14 @@
 
 							<!-- Pager
 							============================================= -->
-							<div class="d-flex justify-content-between mt-5">
-								<a href="#" class="btn btn-outline-secondary">&larr; Older</a>
-								<a href="#" class="btn btn-outline-dark">Newer &rarr;</a>
-							</div>
+							{{ $posts->links('pagination::canvas-3d') }}
 							<!-- .pager end -->
 
 						</div><!-- .postcontent end -->
 
 						<!-- Sidebar
 						============================================= -->
-						<livewire:sidebar />
+						@include(getTheme('widgets.sidebar'))
 						<!-- .sidebar end -->
 					</div>
 

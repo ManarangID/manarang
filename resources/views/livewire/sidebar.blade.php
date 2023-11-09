@@ -1,4 +1,4 @@
-<div class="sidebar col-lg-3">
+						<div class="sidebar col-lg-3">
 							<div class="sidebar-widgets-wrap">
 
 								<div class="widget clearfix">
@@ -125,6 +125,29 @@
 										@endforeach
 									</div>
 
+								</div>
+
+								<div class="widget clearfix">
+									<div class="dark" style="padding: 25px; background-color: #383838; border-radius: 2px;">
+										<div class="fancy-title title-border">
+											<h4>Subscribe</h4>
+										</div>
+
+										<p style="font-size: 15px; line-height: 1.5; color: #999;">Subscribe to Our Newsletter to get Important News, Amazing Offers &amp; Inside Scoops:</p>
+										<form action="{{ route('subscribe') }}" method="post" class="mb-0">
+											@csrf
+											@if (session('subscribed'))
+											<div class="alert alert-success">
+												{{ session('subscribed') }}
+											</div>
+											@endif
+											<div class="input-group mx-auto">
+											<div class="input-group-text"><i class="icon-email2"></i></div>
+											<input type="email" name="email" class="form-control required email" placeholder="Enter your Email">
+											</div>
+											<button class="button button-3d w-100 button-small m-0" style="margin-top: 15px !important;" type="submit">Subscribe</button>
+										</form>
+									</div>
 								</div>
 
 							</div>

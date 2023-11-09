@@ -1,9 +1,11 @@
 <?php
 
 use App\Models\Tag;
+use App\Models\Menu;
 use App\Models\Post;
 use App\Models\Pages;
 use App\Models\Theme;
+use App\Models\Comment;
 use App\Models\Gallery;
 use App\Models\Setting;
 use App\Models\Categories;
@@ -80,6 +82,17 @@ if (!function_exists('getPicturepages')) {
 				return asset(Storage::url('pages/'.$name));
 			}
 		}
+	}
+}
+
+if (!function_exists('getPictureuser')) {
+	function getPictureuser($name, $type, $user)
+    {
+			if (file_exists(Storage::url($name))) {
+				return asset(Storage::url($name));
+			} else {
+				return asset(Storage::url($name));
+			}
 	}
 }
 

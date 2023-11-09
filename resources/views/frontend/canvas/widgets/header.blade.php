@@ -1,5 +1,4 @@
-<div>
-	<!-- Header
+<!-- Header
 	============================================= -->
 	<header id="header" class="full-header transparent-header" data-sticky-class="not-dark">
 		<div id="header-wrap">
@@ -43,10 +42,10 @@
 					</div>
 					<!-- Primary Navigation
 					============================================= -->
-					<nav class="primary-menu">
-					<ul class="menu-container">
-					@each(getTheme('widgets.menu'), getMenus(), 'menu', getTheme('widgets.menu'))
-						</ul>
+					<nav class="primary-menu style-5">
+                        <ul class="menu-container">
+                            @each(getTheme('widgets.menu'), getMenus(), 'menu', getTheme('widgets.menu'))
+                        </ul>
 					</nav><!-- #primary-menu end -->
 					<form class="top-search-form" action="search.html" method="get">
 						<input type="text" name="q" class="form-control" value="" placeholder="Type &amp; Hit Enter.." autocomplete="off">
@@ -56,4 +55,3 @@
 		</div>
 		<div class="header-wrap-clone"></div>
 	</header><!-- #header end -->
-</div>

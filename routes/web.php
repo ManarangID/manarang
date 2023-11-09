@@ -28,7 +28,7 @@ use App\Http\Controllers\SubscriberController;
 // Route::get('/', function () {
 //     return view('frontend.canvas.home');
 // });
-    Route::get('/', [HomeController::class, 'show'])->name('home');
+    Route::get('/', [HomeController::class, 'index'])->name('home');
     
     // Subscribe 
     Route::post('/subscriber', [SubscriberController::class, 'store'])->name('subscribe');
@@ -103,7 +103,9 @@ Route::controller(GoogleController::class)->group(function(){
     Route::get('auth/facebook', 'redirectToFacebook')->name('auth.facebook');
     Route::get('auth/facebook/callback', 'handleFacebookCallback');
 });
-Route::get('posts/{seotitle}', [PostController::class, 'show'])->name('posts.show');
-Route::get('pages/{seotitle}', [PagesController::class, 'detail'])->name('pages.detail');
+Route::get('detailpost/{seotitle}', [PostController::class, 'show'])->name('posts.show');
+Route::get('pages/{seotitle}', [PagesController::class, 'show'])->name('pages.show');
 Route::get('category/{seotitle}', [CategoriesController::class, 'show'])->name('categories.show');
+Route::post('comment/send/{seotitle}', [PostController::class, 'send'])->name('posts.send');
+
 

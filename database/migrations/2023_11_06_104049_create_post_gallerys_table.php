@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pages', function (Blueprint $table) {
+        Schema::create('post_gallerys', function (Blueprint $table) {
             $table->increments('id');
+			$table->integer('post_id')->default('1');
 			$table->string('title')->nullable();
-			$table->string('seotitle')->nullable();
-			$table->text('content')->nullable();
 			$table->string('picture')->nullable();
-			$table->enum('active', ['Y', 'N'])->default('Y');
 			$table->integer('created_by')->default('1');
 			$table->integer('updated_by')->default('1');
             $table->timestamps();
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pages');
+        Schema::dropIfExists('post_gallerys');
     }
 };

@@ -16,13 +16,4 @@ class AppServiceProvider extends ServiceProvider
     {
         //
     }
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        View::share('pages', Pages::where('active','Y')->take(5)->get());
-        View::share('categories', Categories::where('active','Y')->take(5)->get());
-    }
 }
