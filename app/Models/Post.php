@@ -20,7 +20,7 @@ class Post extends Model
                 ->setDescriptionForEvent(fn(string $eventName) => "This model has been {$eventName}")
                 ->useLogName('Post');
     }
-    
+	
     /**
      * Indicates if the model should be timestamped.
      *
@@ -50,9 +50,25 @@ class Post extends Model
     protected $fillable = [
 		'category_id', 'title', 'seotitle', 'content', 'meta_description', 'picture', 'picture_description', 'tag', 'type', 'active', 'headline', 'comment', 'hits', 'created_by', 'updated_by'
 	];
-
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
+	
+	public function createdBy()
+	{
+		return $this->belongsTo('App\Models\User', 'created_by');
+	}
+	
+	public function updatedBy()
+	{
+		return $this->belongsTo('App\Models\User', 'updated_by');
+	}
+	
+	public function category()
+	{
+		return $this->belongsTo('App\Models\Categories', 'category_id');
+	}
+	
+	public function comments() {
+		return $this->hasMany('App\Models\Comment', 'post_id');
+	}
+	
+	protected static $logAttributes = ['*'];
 }

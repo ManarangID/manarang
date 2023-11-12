@@ -21,12 +21,50 @@ class Album extends Model
                 ->setDescriptionForEvent(fn(string $eventName) => "This model has been {$eventName}")
                 ->useLogName('Album');
     }
+	
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    // public $timestamps = false;
 
-    public function user(){
-        return $this->belongsTo(User::class);
-    }
+    /**
+     * The database table used by the model.
+     *
+     * @var string
+     */
+    protected $table = 'albums';
 
+    /**
+     * The database primary key value.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'title', 'seotitle', 'active', 'updated_by', 'created_by', 'updated_at', 'created_at'
-    ];
+		'title', 'seotitle', 'active', 'created_by', 'updated_by'
+	];
+	
+	public function createdBy()
+	{
+		return $this->belongsTo('App\Models\User', 'created_by');
+	}
+	
+	public function updatedBy()
+	{
+		return $this->belongsTo('App\Models\User', 'updated_by');
+	}
+	
+	public function gallerys() {
+		return $this->hasMany('App\Models\Gallery', 'album_id');
+	}
+	
+	protected static $logAttributes = ['*'];
 }

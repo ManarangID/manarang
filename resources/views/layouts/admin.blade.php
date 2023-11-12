@@ -1,230 +1,179 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <title>{{ config('app.name', 'Laravel') }}</title>
-        <link rel="icon" href="{{ Storage::url('images/favicon.png') }}">
-          <!-- Google Font: Source Sans Pro -->
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-        <!-- Font Awesome -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/fontawesome-free/css/all.min.css">
-        <!-- Theme style -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/dist')}}/css/adminlte.min.css">
-        <!-- overlayScrollbars -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/overlayScrollbars/css/OverlayScrollbars.min.css">
-        <!-- SweetAlert2 -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
-        <!-- Toastr -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/toastr/toastr.min.css">
-        <!-- DataTables -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/datatables-bs4/css/dataTables.bootstrap4.min.css">
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/datatables-responsive/css/responsive.bootstrap4.min.css">
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/datatables-buttons/css/buttons.bootstrap4.min.css">
-        <!-- summernote -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/summernote/summernote-bs4.min.css">  <!-- CodeMirror -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/codemirror/codemirror.css">
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/codemirror/theme/monokai.css">
-        <!-- SimpleMDE -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/simplemde/simplemde.min.css">
-        <!-- Ekko Lightbox -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/ekko-lightbox/ekko-lightbox.css">
-        <!-- iCheck for checkboxes and radio inputs -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/icheck-bootstrap/icheck-bootstrap.min.css">
-        <!-- Bootstrap Color Picker -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css">
-        <!-- daterange picker -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/daterangepicker/daterangepicker.css">
-        <!-- Tempusdominus Bootstrap 4 -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
-        <!-- Select2 -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/select2/css/select2.min.css">
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/select2-bootstrap4-theme/select2-bootstrap4.min.css">
-        <!-- Bootstrap4 Duallistbox -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/bootstrap4-duallistbox/bootstrap-duallistbox.min.css">
-        <!-- BS Stepper -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/bs-stepper/css/bs-stepper.min.css">
-        <!-- dropzonejs -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/dropzone/min/dropzone.min.css">
-        <!-- Toastr -->
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" rel="stylesheet" />
-        <!-- flag-icon-css -->
-        <link rel="stylesheet" href="{{asset('AdminLTE/plugins')}}/flag-icon-css/css/flag-icon.min.css">
-
-        <!-- Styles -->
-        @livewireStyles
-    </head>
-    <body class="hold-transition sidebar-mini">
-        <div class="wrapper">
-
-
-            <!-- Main Sidebar Container -->
-            <livewire:admin-menu />
-            <!-- End Main Sidebar Container -->
-            {{ $slot }}
-
-            <livewire:admin-footer />
-
-            <!-- Control Sidebar -->
-            <aside class="control-sidebar control-sidebar-dark">
-                <!-- Control sidebar content goes here -->
-            </aside>
-            <!-- /.control-sidebar -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{{ str_replace('_', '-', app()->getLocale()) }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="@yield('title')" />
+    <meta name="generator" content="{{ config('app.version') }}" />
+    <meta name="author" content="POPOJI" />
+	<meta name="csrf-token" content="{{ csrf_token() }}">
+	
+	<title>@yield('title') - {{ config('app.name') }}</title>
+	
+	<link rel="shortcut icon" type="image/x-icon" href="{{ Storage::url('images/favicon.png') }}">
+	<link href="{{ asset('admin/lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
+	<link href="{{ asset('admin/lib/ionicons/css/ionicons.min.css') }}" rel="stylesheet">
+	<link href="{{ asset('admin/lib/datatables.net-dt/css/jquery.dataTables.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('admin/lib/datatables.net-responsive-dt/css/responsive.dataTables.min.css') }}" rel="stylesheet">
+	<link href="{{ asset('admin/lib/select2/css/select2.min.css') }}" rel="stylesheet">
+	<link href="{{ asset('admin/lib/sweetalert/sweetalert2.min.css') }}" rel="stylesheet">
+	<link href="{{ asset('admin/lib/nestable/jquery.nestable.css') }}" rel="stylesheet">
+	<link href="{{ asset('admin/filemanager/fancybox/jquery.fancybox.css') }}" rel="stylesheet">
+	
+	@stack('styles')
+	
+	<link href="{{ asset('admin/assets/css/dashforge.css') }}" rel="stylesheet">
+	
+	<script>
+		window.Laravel = <?php echo json_encode([
+			'csrfToken' => csrf_token(),
+		]); ?>
+	</script>
+</head>
+<body>
+	<aside class="aside aside-fixed">
+        <div class="aside-header">
+            <a href="{{ url('/dashboard') }}" class="aside-logo pt-2">POPOJI</a>
+            <a href="#" class="aside-menu-link pt-1">
+                <i data-feather="menu"></i>
+                <i data-feather="x"></i>
+            </a>
         </div>
-        <!-- ./wrapper -->
+        <div class="aside-body">
+			<ul class="nav nav-aside">
+				<li class="nav-label">{{ __('general.dashboard') }}</li>
+				<li class="nav-item"><a href="{{ url('/dashboard') }}" class="nav-link"><i data-feather="tv"></i> <span>{{ __('general.dashboard') }}</span></a></li>
+				<li class="nav-label mg-t-25">{{ __('general.content') }}</li>
+				<li class="nav-item"><a href="{{ url('/dashboard/posts/table') }}" class="nav-link"><i data-feather="book-open"></i> <span>{{ __('general.posts') }}</span></a></li>
+				<li class="nav-item"><a href="{{ url('/dashboard/categories/table') }}" class="nav-link"><i data-feather="folder-plus"></i> <span>{{ __('general.categories') }}</span></a></li>
+				<li class="nav-item"><a href="{{ url('/dashboard/tags/table') }}" class="nav-link"><i data-feather="bookmark"></i> <span>{{ __('general.tags') }}</span></a></li>
+				<li class="nav-item"><a href="{{ url('/dashboard/comments/table') }}" class="nav-link"><i data-feather="message-square"></i> <span>{{ __('general.comments') }}</span></a></li>
+				<li class="nav-item"><a href="{{ url('/dashboard/pages/table') }}" class="nav-link"><i data-feather="file-text"></i> <span>{{ __('general.pages') }}</span></a></li>
+				<li class="nav-label mg-t-25">{{ __('general.appearance') }}</li>
+				<li class="nav-item"><a href="{{ url('/dashboard/themes/table') }}" class="nav-link"><i data-feather="aperture"></i> <span>{{ __('general.themes') }}</span></a></li>
+				<li class="nav-item"><a href="{{ url('/dashboard/menu-manager') }}" class="nav-link"><i data-feather="list"></i> <span>{{ __('general.menu_manager') }}</span></a></li>
+				<li class="nav-item"><a href="{{ url('/dashboard/settings') }}" class="nav-link"><i data-feather="settings"></i> <span>{{ __('general.settings') }}</span></a></li>
+				<li class="nav-label mg-t-25">{{ __('general.component') }}</li>
+				<li class="nav-item"><a href="{{ url('/dashboard/components/table') }}" class="nav-link"><i data-feather="package"></i> <span>{{ __('general.components') }}</span></a></li>
+				<li class="nav-item"><a href="{{ url('/dashboard/gallerys/table') }}" class="nav-link"><i data-feather="image"></i> <span>{{ __('general.gallerys') }}</span></a></li>
+				<li class="nav-item"><a href="{{ url('/dashboard/contacts/table') }}" class="nav-link"><i data-feather="mail"></i> <span>{{ __('general.contacts') }}</span></a></li>
+				<!-- <li class="nav-item"><a href="{{ url('/dashboard/clark') }}" class="nav-link"><i data-feather="command"></i> <span>{{ __('general.clark') }}</span></a></li> !-->
+				<li class="nav-label mg-t-25">{{ __('general.user') }}</li>
+				<li class="nav-item"><a href="{{ url('/dashboard/users/table') }}" class="nav-link"><i data-feather="users"></i> <span>{{ __('general.users') }}</span></a></li>
+				<li class="nav-item"><a href="{{ url('/dashboard/roles/table') }}" class="nav-link"><i data-feather="life-buoy"></i> <span>{{ __('general.roles') }}</span></a></li>
+				<li class="nav-item"><a href="{{ url('/dashboard/permissions/table') }}" class="nav-link"><i data-feather="shield"></i> <span>{{ __('general.permissions') }}</span></a></li>
+			</ul>
+		</div>
+    </aside>
+	
+	<div class="content ht-100v pd-0">
+		<div class="content-header">
+			<div class="content-search">
+				<i data-feather="search"></i>
+				<input type="search" class="form-control data-search" placeholder="{{ __('general.search') }}...">
+			</div>
+			
+			<div class="row">
+				<nav class="nav mt-2 mr-4 d-none d-sm-block">
+					<a href="{{ url('/') }}" class="nav-link" target="_blank" data-toggle="tooltip" data-placement="left" title="{{ __('general.view_front_page') }}"><i data-feather="home"></i></a>
+				</nav>
+				
+				<div class="navbar-right pr-3">
+					<div class="dropdown dropdown-profile">
+						<a href="#" class="dropdown-link" data-toggle="dropdown" data-display="static">
+							@if (Auth::user()->picture == '')
+							<div class="avatar avatar-sm"><img src="{{ asset('admin/assets/img/avatar.jpg') }}" class="rounded-circle" alt=""></div>
+							@else
+								@if (Auth::user()->hasRole('member'))
+									<div class="avatar avatar-sm"><img src="{{ asset('admin/uploads/users/user-' . Auth::user()->id . '/medium/medium_' . Auth::user()->picture) }}" class="rounded-circle" alt=""></div>
+								@else
+									<div class="avatar avatar-sm"><img src="{{ asset('admin/uploads/medium/medium_' . Auth::user()->picture) }}" class="rounded-circle" alt=""></div>
+								@endif
+							@endif
+						</a>
+						
+						<div class="dropdown-menu dropdown-menu-right tx-13">
+							<h6 class="tx-semibold mg-b-5">{{ Auth::user()->name }}</h6>
+							<p class="mg-b-25 tx-12 tx-color-03">{{ Auth::user()->email }}</p>
+							<a href="{{ url('/dashboard/users/'.Hashids::encode(Auth::user()->id).'/edit') }}" class="dropdown-item"><i data-feather="edit-3"></i> {{ __('general.edit_profile') }}</a>
+							@if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('admin'))
+								<a href="{{ url('/dashboard/settings') }}" class="dropdown-item"><i data-feather="settings"></i> {{ __('general.settings') }}</a>
+							@endif
+							<div class="dropdown-divider"></div>
+							<a href="http://www.popojicms.org/contact" class="dropdown-item" target="_blank"><i data-feather="help-circle"></i> {{ __('general.help') }}</a>
+							<a href="https://www.facebook.com/popojicms/?ref=bookmarks" class="dropdown-item" target="_blank"><i data-feather="life-buoy"></i> {{ __('general.forum') }}</a>
+							<a href="javascript:void(0);" class="dropdown-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i data-feather="log-out"></i> {{ __('general.sign_out') }}</a>
+							<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+								@csrf
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="content-body">
+			<div class="container">
+				@if (Session::has('flash_message'))
+					<div class="alert-main">
+						<div class="pos-absolute t-10 r-10">
+							<div class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="opacity:1;">
+								<div class="toast-header">
+									<h6 class="tx-inverse tx-14 mg-b-0 mg-r-auto">{{ __('general.notification') }}</h6>
+									<button type="button" class="ml-2 mb-1 close tx-normal" data-dismiss="toast" aria-label="Close">
+										<span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+								<div class="toast-body bg-gray-100">{{ __('general.message') }} : {{ Session::get('flash_message') }}</div>
+							</div>
+						</div>
+					</div>
+				@endif
+				
+				@yield('content')
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal alertalldel" id="alertalldel" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-md modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-body m-3 text-center">
+					<div class="swal2-icon swal2-warning" style="display:flex;"><span class="swal2-icon-text">!</span></div>
+					<h3>{{ __('general.delete_1') }}</h3>
+					<p class="mb-0">{{ __('general.delete_2') }}</p>
+				</div>
+				<div class="modal-footer modal-action-footer text-center mb-3">
+					<div class="mx-auto" style="width:200px;">
+						<button type="button" class="btn btn-danger btn-loading-overlay" id="confirmdel" autofocus>{{ __('general.yes') }}</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('general.cancel') }}</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	@yield('modal')
 
-        <!-- jQuery -->
-        <script src="{{asset('AdminLTE/plugins')}}/jquery/jquery.min.js"></script>
-        <!-- jQuery UI 1.11.4 -->
-        <script src="{{asset('AdminLTE/plugins')}}/jquery-ui/jquery-ui.min.js"></script>
-        <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
-        <script>
-        $.widget.bridge('uibutton', $.ui.button)
-        </script>
-        <!-- Bootstrap 4 -->
-        <script src="{{asset('AdminLTE/plugins')}}/bootstrap/js/bootstrap.bundle.min.js"></script>
-        <!-- overlayScrollbars -->
-        <script src="{{asset('AdminLTE/plugins')}}/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
-        <!-- AdminLTE App -->
-        <script src="{{asset('AdminLTE/dist')}}/js/adminlte.js"></script>
-        <!-- SweetAlert2 -->
-        <script src="{{asset('AdminLTE/dist')}}/sweetalert2/sweetalert2.min.js"></script>
-        <!-- Toastr -->
-        <script src="{{asset('AdminLTE/dist')}}/toastr/toastr.min.js"></script>
-        <!-- DataTables  & Plugins -->
-        <script src="{{asset('AdminLTE/plugins')}}/datatables/jquery.dataTables.min.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/datatables-responsive/js/dataTables.responsive.min.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/datatables-buttons/js/dataTables.buttons.min.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/jszip/jszip.min.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/pdfmake/pdfmake.min.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/pdfmake/vfs_fonts.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/datatables-buttons/js/buttons.html5.min.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/datatables-buttons/js/buttons.print.min.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/datatables-buttons/js/buttons.colVis.min.js"></script>
-        <!-- bs-custom-file-input -->
-        <script src="{{asset('AdminLTE/plugins')}}/bs-custom-file-input/bs-custom-file-input.min.js"></script>
-        <!-- Summernote -->
-        <script src="{{asset('AdminLTE/plugins')}}/summernote/summernote-bs4.min.js"></script>
-        <!-- Ekko Lightbox -->
-        <script src="{{asset('AdminLTE/plugins')}}/ekko-lightbox/ekko-lightbox.min.js"></script>
-        <!-- Filterizr-->
-        <script src="{{asset('AdminLTE/plugins')}}/filterizr/jquery.filterizr.min.js"></script>
-        <!-- Select2 -->
-        <script src="{{asset('AdminLTE/plugins')}}/select2/js/select2.full.min.js"></script>
-        <!-- Bootstrap4 Duallistbox -->
-        <script src="{{asset('AdminLTE/plugins')}}/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
-        <!-- InputMask -->
-        <script src="{{asset('AdminLTE/plugins')}}/moment/moment.min.js"></script>
-        <script src="{{asset('AdminLTE/plugins')}}/inputmask/jquery.inputmask.min.js"></script>
-        <!-- date-range-picker -->
-        <script src="{{asset('AdminLTE/plugins')}}/daterangepicker/daterangepicker.js"></script>
-        <!-- bootstrap color picker -->
-        <script src="{{asset('AdminLTE/plugins')}}/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
-        <!-- Tempusdominus Bootstrap 4 -->
-        <script src="{{asset('AdminLTE/plugins')}}/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
-        <!-- Bootstrap Switch -->
-        <script src="{{asset('AdminLTE/plugins')}}/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-        <!-- BS-Stepper -->
-        <script src="{{asset('AdminLTE/plugins')}}/bs-stepper/js/bs-stepper.min.js"></script>
-        <!-- dropzonejs -->
-        <script src="{{asset('AdminLTE/plugins')}}/dropzone/min/dropzone.min.js"></script>
-        <!-- Toastr -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-        <script>
-        $(document).ready(function() {
-            toastr.options.timeOut = 10000;
-            @if (Session::has('error'))
-                toastr.error('{{ Session::get('error') }}');
-            @elseif(Session::has('success'))
-                toastr.success('{{ Session::get('success') }}');
-            @endif
-        });
-
-    </script>
-        <script>
-        $(function () {
-        bsCustomFileInput.init();
-        });
-        </script>
-        
-        <script>
-        $(function () {
-            // Summernote
-            $('#summernote').summernote({
-            height: 500,
-            focus: true
-            })
-
-            // CodeMirror
-            CodeMirror.fromTextArea(document.getElementById("codeMirrorDemo"), {
-            mode: "htmlmixed",
-            theme: "monokai"
-            });
-        })
-        </script>
-
-        <script>
-        $(function () {
-            $(document).on('click', '[data-toggle="lightbox"]', function(event) {
-            event.preventDefault();
-            $(this).ekkoLightbox({
-                alwaysShowClose: true
-            });
-            });
-
-            $('.filter-container').filterizr({gutterPixels: 3});
-            $('.btn[data-filter]').on('click', function() {
-            $('.btn[data-filter]').removeClass('active');
-            $(this).addClass('active');
-            });
-        })
-        </script>
-        <script>
-        $(function () {
-            $("#example1").DataTable({
-            "responsive": true, "lengthChange": false, "autoWidth": false,
-            "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
-            "paging": true,
-            "lengthChange": false,
-            "searching": false,
-            "ordering": true,
-            "info": true,
-            "autoWidth": false,
-            "responsive": true,
-            });
-        });
-        </script>
-        <!-- Page specific script -->
-        <script type="text/javascript">
-            $('#title').on('input', function() {
-                var permalink;
-                permalink = $.trim($(this).val());
-                permalink = permalink.replace(/\s+/g,' ');
-                $('#seotitle').val(permalink.toLowerCase());
-                $('#seotitle').val($('#seotitle').val().replace(/\W/g, ' '));
-                $('#seotitle').val($.trim($('#seotitle').val()));
-                $('#seotitle').val($('#seotitle').val().replace(/\s+/g, '-'));
-                var gappermalink = $('#seotitle').val();
-                $('#permalink').html(gappermalink);
-            });
-
-            $('#seotitle').on('input', function() {
-            var permalink;
-            permalink = $(this).val();
-            permalink = permalink.replace(/\s+/g,' ');
-            $('#seotitle').val(permalink.toLowerCase());
-            $('#seotitle').val($('#seotitle').val().replace(/\W/g, ' '));
-            $('#seotitle').val($('#seotitle').val().replace(/\s+/g, '-'));
-            var gappermalink = $('#seotitle').val();
-            $('#permalink').html(gappermalink);
-            });
-        </script>
-    </body>
+	<script src="{{ asset('admin/lib/jquery/jquery.min.js') }}"></script>
+	<script src="{{ asset('admin/lib/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+	<script src="{{ asset('admin/lib/feather-icons/feather.min.js') }}"></script>
+	<script src="{{ asset('admin/lib/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
+	<script src="{{ asset('admin/lib/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('admin/lib/datatables.net-dt/js/dataTables.dataTables.min.js') }}"></script>
+    <script src="{{ asset('admin/lib/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('admin/lib/datatables.net-responsive-dt/js/responsive.dataTables.min.js') }}"></script>
+	<script src="{{ asset('admin/lib/select2/js/select2.min.js') }}"></script>
+	<script src="{{ asset('admin/lib/sweetalert/sweetalert2.min.js') }}"></script>
+	<script src="{{ asset('admin/lib/nestable/jquery.nestable.js') }}"></script>
+	<script src="{{ asset('admin/filemanager/fancybox/jquery.fancybox.js') }}"></script>
+	<script src="{{ asset('admin/assets/js/dashforge.aside.js') }}"></script>
+	<script src="{{ asset('admin/lib/js-cookie/js.cookie.js') }}"></script>
+	
+	@stack('scripts')
+	
+	<script src="{{ asset('admin/assets/js/dashforge.js') }}"></script>
+	<script src="{{ asset('admin/assets/js/popoji-main.js') }}"></script>
+</body>
 </html>

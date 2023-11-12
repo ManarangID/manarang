@@ -180,6 +180,10 @@ return [
         App\Providers\JetstreamServiceProvider::class,
         SEOToolsServiceProvider::class,
 		Anhskohbo\NoCaptcha\NoCaptchaServiceProvider::class,
+        Yajra\DataTables\DataTablesServiceProvider::class,
+        Yajra\DataTables\DataTablesServiceProvider::class,
+        Yajra\DataTables\ButtonsServiceProvider::class,
+        Spatie\Analytics\AnalyticsServiceProvider::class,
         ImageServiceProvider::class
     ])->toArray(),
 
@@ -201,7 +205,9 @@ return [
         'OpenGraph'     => OpenGraph::class,
         'Twitter'       => TwitterCard::class,
         'JsonLd'        => JsonLd::class,
-        'JsonLdMulti'   => JsonLdMulti::class, 
+        'JsonLdMulti'   => JsonLdMulti::class,
+        'DataTables' => Yajra\DataTables\Facades\DataTables::class,
+        'Analytics' => Spatie\Analytics\AnalyticsFacade::class,
     ])->toArray(),
 
 ];

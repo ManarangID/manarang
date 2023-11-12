@@ -8,6 +8,7 @@ use App\Models\Pages;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Laravel\Jetstream\HasProfilePhoto;
+use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -22,6 +23,9 @@ class User extends Authenticatable
     use Notifiable;
     use TwoFactorAuthenticatable;
     use LogsActivity;
+    use HasRoles;
+	
+	protected $guard_name = 'web';
 
 
     public function getActivitylogOptions(): LogOptions
@@ -38,8 +42,13 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
+        'telp', 
+        'bio', 
+        'block', 
+        'picture', 
         'google_id',
         'facebook_id', 
         'created_by', 

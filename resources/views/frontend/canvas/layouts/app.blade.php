@@ -20,7 +20,9 @@
         <link rel="stylesheet" href="{{asset('canvas/css')}}/magnific-popup.css" type="text/css" />
 		<link rel="stylesheet" href="{{asset('canvas/css')}}/swiper.css" type="text/css" />
 		 <link rel="stylesheet" href="{{asset('canvas/css')}}/custom.css" type="text/css" />
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    {!! RecaptchaV3::initJs() !!}
         <!-- Styles -->
         @livewireStyles
 		<script>
@@ -54,7 +56,7 @@
         ============================================= -->
         @include(getTheme('widgets.header'))
         <!-- #top bar & header end -->
-        
+        @include(getTheme('widgets.flash-message'))
         {{ $slot }}
 
 
@@ -138,5 +140,7 @@
         <!-- Footer Scripts
         ============================================= -->
         <script src="{{asset('canvas/js')}}/functions.js"></script>
+		<script src="https://maps.google.com/maps/api/js?key={{ env('GOOGLE_MAP_KEY') }}"></script>
+		<script src="https://www.google.com/recaptcha/api.js?render={{ env('GOOGLE_RECAPTCHA_KEY') }}"></script>
     </body>
 </html>

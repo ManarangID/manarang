@@ -1,5 +1,5 @@
 <x-admin-layout>
-
+@section('title', __('post.datatable_title'))
   <!-- Content Wrapper. Contains posts content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->

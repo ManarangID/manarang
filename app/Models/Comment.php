@@ -11,6 +11,14 @@ class Comment extends Model
 {
     use HasFactory, LogsActivity;
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+                ->logOnly(['name', 'email','content'])
+                ->setDescriptionForEvent(fn(string $eventName) => "This model has been {$eventName}")
+                ->useLogName('Comment');
+    }
+
     /**
      * Indicates if the model should be timestamped.
      *
@@ -40,16 +48,16 @@ class Comment extends Model
     protected $fillable = [
 		'parent', 'post_id', 'name', 'email', 'content', 'active', 'status', 'created_by', 'updated_by'
 	];
-    
-    protected $guarded = [];
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-                ->logOnly(['name', 'email','content'])
-                ->setDescriptionForEvent(fn(string $eventName) => "This model has been {$eventName}")
-                ->useLogName('Comment');
-    }
+	public function createdBy()
+	{
+		return $this->belongsTo('App\Models\User', 'created_by');
+	}
+
+	public function updatedBy()
+	{
+		return $this->belongsTo('App\Models\User', 'updated_by');
+	}
 
 	public function mainParent() {
 		return $this->hasOne('App\Models\Comment', 'id', 'parent');
@@ -62,4 +70,11 @@ class Comment extends Model
 	public static function tree($id, $limit) {
 		return static::with(implode('.', array_fill(0, 100, 'children')))->where([['post_id', '=', $id],['parent', '=', '0']])->paginate($limit);
 	}
+
+	public function post()
+	{
+		return $this->belongsTo('App\Models\Post', 'post_id');
+	}
+
+	protected static $logAttributes = ['*'];
 }

@@ -50,4 +50,16 @@ class Theme extends Model
     protected $fillable = [
 		'title', 'author', 'folder', 'active', 'created_by', 'updated_by'
 	];
+	
+	public function createdBy()
+	{
+		return $this->belongsTo('App\Models\User', 'created_by');
+	}
+	
+	public function updatedBy()
+	{
+		return $this->belongsTo('App\Models\User', 'updated_by');
+	}
+	
+	protected static $logAttributes = ['*'];
 }

@@ -138,5 +138,6 @@
         <!-- Footer Scripts
         ============================================= -->
         <script src="{{asset('canvas/js')}}/functions.js"></script>
-    </body>
+		<script src="https://www.google.com/recaptcha/api.js?render={{ env('GOOGLE_RECAPTCHA_KEY') }}"></script>
+	</body>
 </html>
