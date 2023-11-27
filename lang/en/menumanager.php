@@ -31,6 +31,7 @@ return [
 	'position' => 'Position',
 	'no_parent' => 'No Parent',
 	'table' => 'Table',
+	'nestable' => 'Nestable',
 	'success' => 'Menu order has been saved',
 	'info' => 'Info',
 	'info_text' => 'Drag the menu list to re-order and automatically to save the position.',

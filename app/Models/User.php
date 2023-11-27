@@ -27,7 +27,6 @@ class User extends Authenticatable
 	
 	protected $guard_name = 'web';
 
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -48,7 +47,7 @@ class User extends Authenticatable
         'telp', 
         'bio', 
         'block', 
-        'picture', 
+        'profile_photo_path', 
         'google_id',
         'facebook_id', 
         'created_by', 

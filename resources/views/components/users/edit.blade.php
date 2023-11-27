@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', __('user.edit_title'))
 
 @section('content')
@@ -22,7 +22,7 @@
 	
 	<div class="card">
 		{!! Form::model($user, [
-			'method' => 'PATCH',
+			'method' => 'PUT',
 			'url' => ['/dashboard/users', Hashids::encode($user->id)],
 			'class' => 'form-horizontal'
 		]) !!}
@@ -35,7 +35,7 @@
 					</ul>
 				@endif
 				
-				@include('backend.users.form', ['formMode' => 'edit'])
+				@include('components.users.form', ['formMode' => 'edit'])
 			</div>
 			<div class="card-footer">
 				<button type="submit" class="btn btn-primary"><i data-feather="send" class="wd-10 mg-r-5"></i> {{ __('general.update') }}</button>

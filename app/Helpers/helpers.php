@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use App\Models\Tag;
 use App\Models\Menu;
 use App\Models\Post;
@@ -8,6 +9,7 @@ use App\Models\Theme;
 use App\Models\Comment;
 use App\Models\Gallery;
 use App\Models\Setting;
+use Jenssegers\Date\Date;
 use App\Models\Categories;
 
 if (!function_exists('getPicture')) {
@@ -439,4 +441,29 @@ if (!function_exists('prettyUrl')) {
 		}
 		return $url;
 	}
+}
+
+function diff_date_for_humans(Carbon $date) : string
+{
+    return (new Jenssegers\Date\Date($date->timestamp))->ago();
+}
+function diff_string_for_humans($stringDate) : string
+{
+    $date = Date::createFromFormat('Y-m-d H:i:s', $stringDate);
+    return (new Jenssegers\Date\Date($date))->ago();
+}
+
+
+function scannerTableLabel($stringDate) : string
+{
+    $now = Jenssegers\Date\Date::now();
+    $date = Jenssegers\Date\Date::createFromFormat('Y-m-d H:i:s', $stringDate);
+    $printDate = (new Jenssegers\Date\Date($date))->ago();
+    $color = $now > $date ? 'info' : 'danger';
+
+    $res = '<span class="badge badge-'.$color.'" style="color:white;">SCANNER: ';
+    $res .= $printDate ;
+    $res .= '</span>';
+
+    return $res;
 }

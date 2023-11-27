@@ -33,7 +33,7 @@ class Subscriber extends Model
      *
      * @var string
      */
-    protected $table = 'subscribes';
+    protected $table = 'subscribers';
 
     /**
      * The database primary key value.

@@ -3,7 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use Illuminate\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Vinkla\Hashids\Facades\Hashids;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
 
 class MenuController extends Controller
 {
@@ -18,9 +23,9 @@ class MenuController extends Controller
 			$menu = new Menu;
 			$menulist = $menu->tree();
 			
-			return response(view('components.menumanager.index')->with('menu', $menulist));
+			return response(view('admin.menumanager.index')->with('menu', $menulist));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 	
@@ -29,10 +34,12 @@ class MenuController extends Controller
 	 *
 	 * @return \Illuminate\View\View
 	 */
-    public function getIndex()
+    public function getIndex(): View
 	{
 		if(Auth::user()->can('read-menumanager')) {
-			return view('backend.menumanager.datatable');
+			$menumanagers = Menu::leftJoin('users', 'users.id', '=', 'menus.created_by')
+			->select('menus.*', 'users.id as uid', 'users.name as uname')->get();
+			return view('admin.menumanager.datatable', compact('menumanagers'));
 		} else {
 			return redirect('forbidden');
 		}
@@ -98,7 +105,7 @@ class MenuController extends Controller
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
 		if(Auth::user()->can('create-menumanager')) {
 			$this->validate($request,[
@@ -115,7 +122,7 @@ class MenuController extends Controller
 
 			Menu::create($requestData);
 			
-			return redirect('dashboard/menu-manager')->with('flash_message', __('menumanager.store_notif'));
+			return redirect()->route('menumanager.index')->with('success', __('menumanager.store_notif'));
 		} else {
 			return redirect('forbidden');
 		}
@@ -128,16 +135,9 @@ class MenuController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function show($id)
+    public function show()
     {
-		if(Auth::user()->can('read-menumanager')) {
-			$ids = Hashids::decode($id);
-			$menumanager = Menu::findOrFail($ids[0]);
-
-			return view('backend.menumanager.show', compact('menumanager'));
-		} else {
-			return redirect('forbidden');
-		}
+		//
     }
 
     /**
@@ -147,7 +147,7 @@ class MenuController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function edit($id)
+    public function edit($id): View
     {
 		if(Auth::user()->can('update-menumanager')) {
 			$ids = Hashids::decode($id);
@@ -155,7 +155,7 @@ class MenuController extends Controller
 			$tree = new Menu;
 			$parents = $tree->tree()->toArray();
 
-			return view('backend.menumanager.edit', compact('menumanager', 'parents'));
+			return view('admin.menumanager.edit', compact('menumanager', 'parents'));
 		} else {
 			return redirect('forbidden');
 		}
@@ -169,7 +169,7 @@ class MenuController extends Controller
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): RedirectResponse
     {
 		if(Auth::user()->can('update-menumanager')) {
 			$ids = Hashids::decode($id);
@@ -186,7 +186,7 @@ class MenuController extends Controller
 			$menumanager = Menu::findOrFail($ids[0]);
 			$menumanager->update($requestData);
 
-			return redirect('dashboard/menu-manager')->with('flash_message', __('menumanager.update_notif'));
+			return redirect()->route('menumanager.index')->with('success', __('menumanager.update_notif'));
 		} else {
 			return redirect('forbidden');
 		}
@@ -205,7 +205,7 @@ class MenuController extends Controller
 			$ids = Hashids::decode($id);
 			Menu::destroy($ids[0]);
 
-			return redirect('dashboard/menu-manager')->with('flash_message', __('menumanager.destroy_notif'));
+			return redirect()->back()->with('success', __('menumanager.destroy_notif'));
 		} else {
 			return redirect('forbidden');
 		}
@@ -218,18 +218,15 @@ class MenuController extends Controller
      *
      * @return void
      */
-    public function deleteAll(Request $request)
+    public function deleteAll(Request $request): RedirectResponse
     {
 		if(Auth::user()->can('delete-menumanager')) {
-			if ($request->has('id')) {
-				$ids = $request->id;
-				foreach($ids as $id){
-					$idd = Hashids::decode($id);
-					Menu::destroy($idd[0]);
-				}
-				return redirect('dashboard/menu-manager')->with('flash_message', __('menumanager.destroy_notif'));
+			if ($request->has('ids')) {
+				$ids = $request->ids;
+        		Menu::whereIn('id',explode(",",$ids))->delete();
+				return redirect()->back()->with('success', __('menumanager.destroy_notif'));
 			} else {
-				return redirect('dashboard/menu-manager')->with('flash_message', __('menumanager.destroy_error_notif'));
+				return redirect('menumanager.index')->with('success', __('menumanager.destroy_error_notif'));
 			}
 		} else {
 			return redirect('forbidden');

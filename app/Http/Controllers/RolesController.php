@@ -19,22 +19,15 @@ class RolesController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index(): View
     {
-        return view('components.roles.datatable');
-		
+		if(Auth::user()->can('read-roles')) {
+			$roles = Role::all();
+			return view('admin.roles.datatable', compact('roles'));
+		} else {
+			return abort('404');
+		}
     }
-	
-	/**
-	 * Displays datatables front end view
-	 *
-	 * @return \Illuminate\View\View
-	 */
-    public function getIndex()
-	{
-		return view('components.roles.datatable');
-		
-	}
 	
 	/**
 	 * Process datatables ajax request.
@@ -71,27 +64,27 @@ class RolesController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): View
     {
         if(Auth::user()->can('create-roles')) {
-			return view('backend.roles.create');
+			return view('admin.roles.create');
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         if(Auth::user()->can('create-roles')) {
 			$this->validate($request, ['name' => 'required|string|max:50']);
 			$role = Role::firstOrCreate(['name' => $request->name]);
 
-			return redirect('dashboard/roles')->with('flash_message', __('role.store_notif'));
+			return redirect()->route('roles.index')->with('success', __('role.store_notif'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -133,9 +126,9 @@ class RolesController extends Controller
 			
 			$permissions = Permission::all()->pluck('name');
 
-			return view('backend.roles.edit', compact('role', 'permissions', 'hasPermission'));
+			return view('admin.roles.edit', compact('role', 'permissions', 'hasPermission'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -155,24 +148,24 @@ class RolesController extends Controller
 				$role->syncPermissions($request->permission);
 			}
 
-			return redirect('dashboard/roles')->with('flash_message', __('role.update_notif'));
+			return redirect()->route('roles.index')->with('success', __('role.update_notif'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id): RedirectResponse
     {
-        if(Auth::user()->can('delete-roles')) {
+		if(Auth::user()->can('delete-roles')) {
 			$ids = Hashids::decode($id);
 			Role::destroy($ids[0]);
 
-			return redirect('dashboard/roles')->with('flash_message', __('role.destroy_notif'));
+			return redirect()->route('roles.index')->with('success', __('roles.destroy_notif'));
 		} else {
-			return redirect('forbidden');
+			return abort('404');
 		}
     }
 	
@@ -183,17 +176,19 @@ class RolesController extends Controller
      *
      * @return void
      */
-    public function deleteAll(Request $request)
+    public function deleteAll(Request $request): RedirectResponse
     {
-			if ($request->has('id')) {
-				$ids = $request->id;
-				foreach($ids as $id){
-					$idd = Hashids::decode($id);
-					Role::destroy($idd[0]);
-				}
-				return redirect('dashboard/roles')->with('flash_message', __('role.destroy_notif'));
+		if(Auth::user()->can('delete-roles')) {
+			if ($request->has('ids')) {
+				$ids = $request->ids;
+        		Role::whereIn('id',explode(",",$ids))->delete();
+				return redirect()->back()->with('success', __('role.destroy_notif'));
 			} else {
-				return redirect('dashboard/roles')->with('flash_message', __('role.destroy_error_notif'));
+				return redirect()->route('roles.index')->with('error', __('role.destroy_error_notif'));
 			}
+		} else {
+			return abort('404');
+		}
+         
     }
 }

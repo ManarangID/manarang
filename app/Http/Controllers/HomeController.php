@@ -15,6 +15,7 @@ use Illuminate\View\View;
 use App\Models\Categories;
 use Illuminate\Http\Request;
 use Spatie\Analytics\Period;
+use Illuminate\Http\Response;
 use Spatie\Analytics\Analytics;
 use Illuminate\Support\Facades\Auth;
 use Artesaos\SEOTools\Facades\SEOTools;
@@ -114,7 +115,7 @@ class HomeController extends Controller
      *
      * @return void
      */
-    public function dashboard()
+    public function dashboard(): Response
     {
 		$post = Post::where('active', '=', 'Y')->count();
 		$category = Categories::where('active', '=', 'Y')->count();
@@ -123,7 +124,7 @@ class HomeController extends Controller
 		$commentunread = Comment::where('status', '=', 'N')->count();
 		$pages = Pages::where('active', '=', 'Y')->count();
 		$contactunread = Contact::where('status', '=', 'N')->count();
-		$component = Component::where('active', '=', 'Y')->count();
+		$components = Component::where('active', '=', 'Y')->count();
 		$theme = Theme::where('active', '=', 'Y')->count();
 		$user = User::where('block', '=', 'N')->count();
 		$populars = Post::where('active', '=', 'Y')->orderBy('hits', 'desc')->limit(5)->get();
@@ -134,8 +135,8 @@ class HomeController extends Controller
 			$_SESSION['RF']['subfolder'] = '';
 		}
 		
-		return view('components.admins.dashboard', compact('post', 'pages', 'category', 'tag', 'comment', 'commentunread', 'pages', 'contactunread', 'component', 'theme', 'user', 'populars'));
-    }
+		return response (view('admin.dashboard', compact('post', 'pages', 'category', 'tag', 'comment', 'commentunread', 'pages', 'contactunread', 'components', 'theme', 'user', 'populars')));
+	}
 	
 	/**
      * Display analytics pages.

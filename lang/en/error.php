@@ -13,8 +13,8 @@ return [
     |
     */
 
-    'forbiden_title' => '505 Forbidden',
-	'forbiden_text_1' => 'Oopps. Something is broken or check your permission for this page',
-	'forbiden_text_2' => 'We\'ve been automatically alerted of the issue and will work to fix it asap.',
+    '404_title' => '404',
+	'404_text_1' => 'We could not find the page you were looking for. Meanwhile,',
+	'404_text_2' => 'you may return to dashboard or try using the search form.',
 
 ];

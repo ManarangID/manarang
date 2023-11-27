@@ -7,7 +7,7 @@
         <meta name="author" content="{{ getSetting('web_author') }}" />
         <link rel="icon" href="{{ Storage::url('images/favicon.png') }}">
         
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>@yield('title') - {{ config('app.name') }}</title>
         {!! SEO::generate() !!}
         <!-- Stylesheets
         ============================================= -->

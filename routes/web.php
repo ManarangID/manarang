@@ -6,16 +6,21 @@ use App\Livewire\Post\Create;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PostController;
+use App\Livewire\NotificationSweetAlert;
 use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\ComponentController;
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SubscriberController;
 
 /*
@@ -57,7 +62,7 @@ use App\Http\Controllers\SubscriberController;
     Route::get('/subscriber/verify/{token}/{email}', [SubscriberController::class, 'verify'])->name('subscriber_verify');
 
     Route::middleware([
-        'auth:sanctum',
+        'auth:web',
         config('jetstream.auth_session'),
         'verified',
     ])->group(function () {
@@ -66,68 +71,79 @@ use App\Http\Controllers\SubscriberController;
         Route::get('dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
 	    Route::get('dashboard/analytics', [HomeController::class, 'analitycs'])->name('dashboard.analitycs');
 	    Route::get('forbidden', [HomeController::class, 'forbidden']);
+        
+        Route::resource('users', UsersController::class);
+        Route::post('deleteallusers', [UsersController::class, 'deleteAll'])->name('users.deleteAll');
+        
+        Route::resource('roles', RolesController::class);
+        Route::post('deleteallroles', [RolesController::class, 'deleteAll'])->name('roles.deleteAll');
 
-        Route::get('dashboard/users/index', [UsersController::class, 'index'])->name('users.index');
-        Route::get('dashboard/users/table', [UsersController::class, 'getIndex'])->name('users.table');
-        Route::get('dashboard/users/data', [UsersController::class, 'anyData'])->name('users.data');
-        Route::get('dashboard/users/get-user', [UsersController::class, 'getUser'])->name('users.getUser');
-        Route::get('dashboard/users/get-user-not-me', [UsersController::class, 'getUserNotMe'])->name('users.notMe');
-        Route::post('dashboard/users/deleteall', [UsersController::class, 'deleteAll'])->name('users.deletaAll');
+        Route::resource('permissions', PermissionController::class);
+        Route::post('deleteallpermissions', [PermissionController::class, 'deleteAll'])->name('permissions.deleteAll');
 
-        Route::get('dashboard/roles/index', [RolesController::class, 'index'])->name('roles.index');
-        Route::get('dashboard/roles/table', [RolesController::class, 'getIndex'])->name('roles.table');
-        Route::get('dashboard/roles/data', [RolesController::class, 'anyData'])->name('roles.data');
-        Route::post('dashboard/roles/deleteall', [RolesController::class, 'deleteAll'])->name('roles.deleteAll');
+        Route::resource('components', ComponentController::class);
+        Route::post('deleteallcomponents', [ComponentController::class, 'deleteAll'])->name('components.deleteAll');
 
-        Route::get('dashboard/users/index', [UsersController::class, 'index'])->name('users.index');
+        Route::resource('settings', SettingController::class);
+        Route::post('deleteallsettings', [SettingController::class, 'deleteAll'])->name('settings.deleteAll');
+        Route::get('settings', [SettingController::class, 'getGroups'])->name('settings.group');
+        Route::get('settings/sitemap', [SettingController::class, 'sitemap'])->name('settings.sitemap');
+        
+        Route::resource('backups', BackupController::class);
+        Route::get('backups/download/{file_name}', [BackupController::class, 'download'])->name('backups.download');
+
+        Route::resource('menumanager', MenuController::class);
+        Route::get('menutable', [MenuController::class, 'getIndex'])->name('menumanager.menutable');
+        Route::post('menumanager/menusort', [MenuController::class, 'menusort'])->name('menumanager.menusort');
+        Route::post('deleteallmenu', [MenuController::class, 'deleteAll'])->name('menumanager.deleteAll');
 
         Route::get('/subscriber/all', [SubscriberController::class, 'index'])->name('all.subscribe');
         Route::get('/subscriber/compose', [SubscriberController::class, 'compose'])->name('subscriber.compose');
         Route::post('/subscriber/send', [SubscriberController::class, 'send_email_subscriber'])->name('subscriber.mail');
 
-        Route::get('settings', [SettingController::class, 'index'])->name('settings');
-        Route::get('settings/{id}/edit', [SettingController::class, 'edit'])->name('settings.edit');
-        Route::put('settings/{id}', [SettingController::class, 'update'])->name('settings.update');
+        // Route::get('settings', [SettingController::class, 'index'])->name('settings');
+        // Route::get('settings/{id}/edit', [SettingController::class, 'edit'])->name('settings.edit');
+        // Route::put('settings/{id}', [SettingController::class, 'update'])->name('settings.update');
 
-        Route::get('pages', [PagesController::class, 'index'])->name('pages');    
-        Route::post('pages', [PagesController::class, 'store'])->name('pages.store');
-        Route::get('pages/create', [PagesController::class, 'create'])->name('pages.create');
-        Route::get('pages/{id}/edit', [PagesController::class, 'edit'])->name('pages.edit');
-        Route::put('pages/{id}', [PagesController::class, 'update'])->name('pages.update');
-        Route::post('pages/{seotitle}', [PagesController::class, 'likes'])->name('pages.likes');
-        Route::delete('pages/{id}', [PagesController::class, 'destroy'])->name('pages.destroy');
+        // Route::get('pages', [PagesController::class, 'index'])->name('pages');    
+        // Route::post('pages', [PagesController::class, 'store'])->name('pages.store');
+        // Route::get('pages/create', [PagesController::class, 'create'])->name('pages.create');
+        // Route::get('pages/{id}/edit', [PagesController::class, 'edit'])->name('pages.edit');
+        // Route::put('pages/{id}', [PagesController::class, 'update'])->name('pages.update');
+        // Route::post('pages/{seotitle}', [PagesController::class, 'likes'])->name('pages.likes');
+        // Route::delete('pages/{id}', [PagesController::class, 'destroy'])->name('pages.destroy');
         
-        Route::get('posts', [PostController::class, 'index'])->name('posts');    
-        Route::post('posts', [PostController::class, 'store'])->name('posts.store');
-        Route::get('posts/create', [PostController::class, 'create'])->name('posts.create');
-        Route::get('posts/{id}/edit', [PostController::class, 'edit'])->name('posts.edit');
-        Route::put('posts/{id}', [PostController::class, 'update'])->name('posts.update');
-        Route::delete('posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
-        Route::post('posts/{id}', [SubscriberController::class, 'send_new_post'])->name('posts.subscriber');
-        Route::post('posts/{seotitle}', [PostController::class, 'likes'])->name('posts.likes');
+        // Route::get('posts', [PostController::class, 'index'])->name('posts');    
+        // Route::post('posts', [PostController::class, 'store'])->name('posts.store');
+        // Route::get('posts/create', [PostController::class, 'create'])->name('posts.create');
+        // Route::get('posts/{id}/edit', [PostController::class, 'edit'])->name('posts.edit');
+        // Route::put('posts/{id}', [PostController::class, 'update'])->name('posts.update');
+        // Route::delete('posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
+        // Route::post('posts/{id}', [SubscriberController::class, 'send_new_post'])->name('posts.subscriber');
+        // Route::post('posts/{seotitle}', [PostController::class, 'likes'])->name('posts.likes');
 
-        Route::get('categories', [CategoriesController::class, 'index'])->name('categories');    
-        Route::post('categories', [CategoriesController::class, 'store'])->name('categories.store');
-        Route::get('categories/create', [CategoriesController::class, 'create'])->name('categories.create');
-        Route::get('categories/{id}/edit', [CategoriesController::class, 'edit'])->name('categories.edit');
-        Route::put('categories/{id}', [CategoriesController::class, 'update'])->name('categories.update');
-        Route::delete('categories/{id}', [CategoriesController::class, 'destroy'])->name('categories.destroy');
+        // Route::get('categories', [CategoriesController::class, 'index'])->name('categories');    
+        // Route::post('categories', [CategoriesController::class, 'store'])->name('categories.store');
+        // Route::get('categories/create', [CategoriesController::class, 'create'])->name('categories.create');
+        // Route::get('categories/{id}/edit', [CategoriesController::class, 'edit'])->name('categories.edit');
+        // Route::put('categories/{id}', [CategoriesController::class, 'update'])->name('categories.update');
+        // Route::delete('categories/{id}', [CategoriesController::class, 'destroy'])->name('categories.destroy');
         
-        Route::get('gallerys', [GalleryController::class, 'index'])->name('gallerys');    
-        Route::post('gallerys', [GalleryController::class, 'store'])->name('gallerys.store');
-        Route::get('gallerys/create', [GalleryController::class, 'create'])->name('gallerys.create');
-        Route::get('gallerys/{id}/edit', [GalleryController::class, 'edit'])->name('gallerys.edit');
-        Route::put('gallerys/{id}', [GalleryController::class, 'update'])->name('gallerys.update');
-        Route::get('gallerys/{seotitle}', [GalleryController::class, 'show'])->name('gallerys.show');
-        Route::delete('gallerys/{id}', [GalleryController::class, 'destroy'])->name('gallerys.destroy');
+        // Route::get('gallerys', [GalleryController::class, 'index'])->name('gallerys');    
+        // Route::post('gallerys', [GalleryController::class, 'store'])->name('gallerys.store');
+        // Route::get('gallerys/create', [GalleryController::class, 'create'])->name('gallerys.create');
+        // Route::get('gallerys/{id}/edit', [GalleryController::class, 'edit'])->name('gallerys.edit');
+        // Route::put('gallerys/{id}', [GalleryController::class, 'update'])->name('gallerys.update');
+        // Route::get('gallerys/{seotitle}', [GalleryController::class, 'show'])->name('gallerys.show');
+        // Route::delete('gallerys/{id}', [GalleryController::class, 'destroy'])->name('gallerys.destroy');
         
-        Route::get('albums', [AlbumController::class, 'index'])->name('albums');    
-        Route::post('albums', [AlbumController::class, 'store'])->name('albums.store');
-        Route::get('albums/create', [AlbumController::class, 'create'])->name('albums.create');
-        Route::get('albums/{id}/edit', [AlbumController::class, 'edit'])->name('albums.edit');
-        Route::put('albums/{id}', [AlbumController::class, 'update'])->name('albums.update');
-        Route::get('albums/{seotitle}', [AlbumController::class, 'show'])->name('albums.show');
-        Route::delete('albums/{id}', [AlbumController::class, 'destroy'])->name('albums.destroy');
+        // Route::get('albums', [AlbumController::class, 'index'])->name('albums');    
+        // Route::post('albums', [AlbumController::class, 'store'])->name('albums.store');
+        // Route::get('albums/create', [AlbumController::class, 'create'])->name('albums.create');
+        // Route::get('albums/{id}/edit', [AlbumController::class, 'edit'])->name('albums.edit');
+        // Route::put('albums/{id}', [AlbumController::class, 'update'])->name('albums.update');
+        // Route::get('albums/{seotitle}', [AlbumController::class, 'show'])->name('albums.show');
+        // Route::delete('albums/{id}', [AlbumController::class, 'destroy'])->name('albums.destroy');
         
 
     });

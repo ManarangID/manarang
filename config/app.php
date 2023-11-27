@@ -184,6 +184,7 @@ return [
         Yajra\DataTables\DataTablesServiceProvider::class,
         Yajra\DataTables\ButtonsServiceProvider::class,
         Spatie\Analytics\AnalyticsServiceProvider::class,
+        Spatie\Backup\BackupServiceProvider::class,
         ImageServiceProvider::class
     ])->toArray(),
 

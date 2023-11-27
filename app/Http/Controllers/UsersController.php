@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use auth;
 use App\Models\User;
+use Illuminate\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Yajra\DataTables\DataTables;
 use App\DataTables\UsersDataTable;
 use Spatie\Permission\Models\Role;
 use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image as ResizeImage;
 
 class UsersController extends Controller
 {
@@ -18,92 +23,38 @@ class UsersController extends Controller
      *
      * @return void
      */
-    public function index(Request $request)
+    public function index(): View
     {
-		if (auth()->user()->can('read-users')) {
-			return view('components.users.datatable');
+		if(Auth::user()->can('read-users')) {
+			if (Auth::user()->hasRole('superadmin')) {
+				$users = User::all();
+			} elseif (Auth::user()->hasRole('member') || Auth::user()->hasRole('editor')) {
+				$users = User::where('users.id', '!=', '1')
+					->where('users.id', '=', Auth::user()->id)
+					->get();
+			} else {
+				$users = User::where('users.id', '!=', '1')
+					->get();
+			}
+			return view('admin.users.datatable', compact('users'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
-	
-	/**
-	 * Displays datatables front end view
-	 *
-	 * @return \Illuminate\View\View
-	 */
-    public function getIndex()
-	{
-		if(Auth::user()->can('read-users')) {
-			return view('components.users.datatable');
-		} else {
-			return redirect('forbidden');
-		}
-	}
-	
-	/**
-	 * Process datatables ajax request.
-	 *
-	 * @return \Illuminate\Http\JsonResponse
-	 */
-	public function anyData()
-	{
-		if (Auth::user()->hasRole('superadmin')) {
-			$users = User::select('users.*');
-		} elseif (Auth::user()->hasRole('member') || Auth::user()->hasRole('editor')) {
-			$users = User::where('users.id', '!=', '1')
-				->where('users.id', '=', Auth::user()->id)
-				->select('users.*');
-        } else {
-			$users = User::where('users.id', '!=', '1')
-				->select('users.*');
-		}
-		return DataTables::of($users)
-			->addColumn('check', function ($user) {
-				$check = '<div style="text-align:center;">
-					<input type="checkbox" id="titleCheckdel" />
-					<input type="hidden" class="deldata" name="id[]" value="'.Hashids::encode($user->id).'" disabled />
-				</div>';
-				return $check;
-			})
-			->addColumn('block', function ($user) {
-				return $user->block == 'Y' ? 'Block' : 'Unblock';
-			})
-            ->addColumn('action', function ($user) {
-				$btn = '<div style="text-align:center;"><div class="btn-group">';
-				$btn .= '<a href="'.url('dashboard/users/'.Hashids::encode($user->id).'').'" class="btn btn-secondary btn-xs btn-icon" title="'.__('general.view').'" data-toggle="tooltip" data-placement="left"><i class="fa fa-eye"></i></a>';
-				$btn .= '<a href="'.url('dashboard/users/'.Hashids::encode($user->id).'/edit').'" class="btn btn-primary btn-xs btn-icon" title="'.__('general.edit').'" data-toggle="tooltip" data-placement="left"><i class="fa fa-edit"></i></a>';
-				if ($user->id != '1') {
-					if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('admin')) {
-						if ($user->id != Auth::user()->id) {
-							$btn .= '<a href="'.url('dashboard/users/'.Hashids::encode($user->id).'').'" class="btn btn-danger btn-xs btn-icon" data-delete="" title="'.__('general.delete').'" data-toggle="tooltip" data-placement="left"><i class="fa fa-trash"></i></a>';
-						}
-					}
-				}
-				$btn .= '</div></div>';
-				return $btn;
-            })
-			->addColumn('control', function ($user) {
-				$check = '<div style="text-align:center;"><a href="javascript:void(0);" class="btn btn-secondary btn-xs btn-icon"><i class="fa fa-plus"></i></a></div>';
-				return $check;
-			})
-			->escapeColumns([])
-			->make(true);
-	}
 
     /**
      * Show the form for creating a new resource.
      *
      * @return void
      */
-    public function create(Request $request)
+    public function create(): View
     {
 		if(Auth::user()->can('create-users')) {
 			$roles = Role::orderBy('name', 'ASC')->get();
 			
-			return view('backend.users.create', compact('roles'));
+			return view('admin.users.create', compact('roles'));
 		} else {
-			return redirect('forbidden');
+			return abort('404');
 		}
     }
 
@@ -114,7 +65,7 @@ class UsersController extends Controller
      *
      * @return void
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
 		if(Auth::user()->can('create-users')) {
 			$this->validate($request,[
@@ -123,79 +74,26 @@ class UsersController extends Controller
 				'password' => 'required',
 				'roles' => 'required'
 			]);
-			
-			if(in_array('member', $request->roles)) {
-				$username = str_replace(' ', '', strtolower($request->name)) . mt_rand(15, 50);
-				
-				$request->request->add([
-					'username' => $username,
-					'picture' => '',
-					'block' => 'N',
-					'created_by' => Auth::User()->id,
-					'updated_by' => Auth::User()->id
-				]);
-				$data = $request->except('password');
-				$data['password'] = bcrypt($request->password);
-				$user = User::create($data);
-				
-				$user->assignRole($request->roles);
-				
-				if(!File::isDirectory(str_replace('\po-includes', '', str_replace('/po-includes', '', base_path('po-content/uploads/users/user-' . $user->id))))){
-					File::makeDirectory(str_replace('\po-includes', '', str_replace('/po-includes', '', base_path('po-content/uploads/users/user-' . $user->id))), 0777, true, true);
-				}
-				
-				if(!File::isDirectory(str_replace('\po-includes', '', str_replace('/po-includes', '', base_path('po-content/uploads/medium/users/user-' . $user->id))))){
-					File::makeDirectory(str_replace('\po-includes', '', str_replace('/po-includes', '', base_path('po-content/uploads/medium/users/user-' . $user->id))), 0777, true, true);
-				}
-				
-				return redirect('dashboard/users')->with('flash_message', __('user.store_notif'));
-			} else {
-				$username = str_replace(' ', '', strtolower($request->name)) . mt_rand(15, 50);
-				
-				$request->request->add([
-					'username' => $username,
-					'picture' => '',
-					'block' => 'N',
-					'created_by' => Auth::User()->id,
-					'updated_by' => Auth::User()->id
-				]);
-				$data = $request->except('password');
-				$data['password'] = bcrypt($request->password);
-				$user = User::create($data);
-				
-				$user->assignRole($request->roles);
-				
-				if(!File::isDirectory(str_replace('\po-includes', '', str_replace('/po-includes', '', base_path('po-content/uploads/users/user-' . $user->id))))){
-					File::makeDirectory(str_replace('\po-includes', '', str_replace('/po-includes', '', base_path('po-content/uploads/users/user-' . $user->id))), 0777, true, true);
-				}
-				
-				if(!File::isDirectory(str_replace('\po-includes', '', str_replace('/po-includes', '', base_path('po-content/uploads/medium/users/user-' . $user->id))))){
-					File::makeDirectory(str_replace('\po-includes', '', str_replace('/po-includes', '', base_path('po-content/uploads/medium/users/user-' . $user->id))), 0777, true, true);
-				}
-				
-				return redirect('dashboard/users')->with('flash_message', __('user.store_notif'));
-			}
-		} else {
-			return redirect('forbidden');
-		}
-    }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     *
-     * @return void
-     */
-    public function show($id)
-    {
-		if(Auth::user()->can('read-users')) {
-			$ids = Hashids::decode($id);
-			$user = User::findOrFail($ids[0]);
+			$username = str_replace(' ', '', strtolower($request->name)) . mt_rand(15, 50);
+				
+				$request->request->add([
+					'username' => $username,
+					'picture' => '',
+					'block' => 'N',
+					'created_by' => Auth::User()->id,
+					'updated_by' => Auth::User()->id
+				]);
+				$data = $request->except('password');
+				$data['password'] = bcrypt($request->password);
+				$user = User::create($data);
+				
+				$user->assignRole($request->roles);
+				
+				return redirect()->route('users.index')->with('success', __('user.store_notif'));
 			
-			return view('backend.users.show', compact('user'));
 		} else {
-			return redirect('forbidden');
+			return abort('404');
 		}
     }
 
@@ -206,7 +104,7 @@ class UsersController extends Controller
      *
      * @return void
      */
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $id): View
     {
 		if(Auth::user()->can('update-users')) {
 			$ids = Hashids::decode($id);
@@ -218,22 +116,22 @@ class UsersController extends Controller
 					$roles = Role::where('id', '!=', '1')->orderBy('name', 'ASC')->get();
 				}
 
-				$user = User::select('id', 'username', 'name', 'email', 'telp', 'bio', 'block', 'picture')->findOrFail($ids[0]);
+				$user = User::select('id', 'username', 'name', 'email', 'telp', 'bio', 'block', 'profile_photo_path')->findOrFail($ids[0]);
 				
-				return view('backend.users.edit', compact('user', 'roles'));
+				return view('admin.users.edit', compact('user', 'roles'));
 			} else {
 				if (Auth::user()->id == $ids[0]) {
 					$roles = Role::where('id', '!=', '1')->orderBy('name', 'ASC')->get();
 
-					$user = User::select('id', 'username', 'name', 'email', 'telp', 'bio', 'block', 'picture')->findOrFail($ids[0]);
+					$user = User::select('id', 'username', 'name', 'email', 'telp', 'bio', 'block', 'profile_photo_path')->findOrFail($ids[0]);
 					
-					return view('backend.users.edit', compact('user', 'roles'));
+					return view('admin.users.edit', compact('user', 'roles'));
 				} else {
-					return redirect('dashboard/users/'. Hashids::encode(Auth::user()->id) .'/edit');
+					return redirect()->route('users.index', Hashids::encode(Auth::user()->id));
 				}
 			}
 		} else {
-			return redirect('forbidden');
+			return abort('404');
 		}
     }
 
@@ -245,7 +143,7 @@ class UsersController extends Controller
      *
      * @return void
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): RedirectResponse
     {
 		if(Auth::user()->can('update-users')) {
 			$ids = Hashids::decode($id);
@@ -260,6 +158,24 @@ class UsersController extends Controller
 				'updated_by' => Auth::User()->id
 			]);
 			
+			if ($request->hasFile('image')) {
+				//delete old image
+				Storage::delete('public/profile-photos/'.$user->profile_photo_path);
+				
+				$path = public_path('storage/profile-photos/');
+				!is_dir($path) && mkdir($path, 0777, true);
+	
+				$name = $request->image->hashName();
+				ResizeImage::make($request->file('image'))
+					->resize(600, 600)
+					->save($path . $name);
+				
+
+				$user->update([
+					'profile_photo_path' => $name
+				]);
+			}
+			
 			if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('admin')) {
 				if ($request->input('password') == '' || $request->input('password') == null) {
 					$data = $request->except('password');
@@ -273,9 +189,9 @@ class UsersController extends Controller
 				$user->syncRoles($request->roles);
 				
 				if (Auth::user()->hasRole('member')) {
-					return redirect('dashboard/users/' . Hashids::encode(Auth::user()->id) . '/edit')->with('flash_message', 'User updated!');
+					return redirect()->route('users.edit', Hashids::encode(Auth::user()->id))->with('success', 'User updated!');
 				} else {
-					return redirect('dashboard/users')->with('flash_message', __('user.update_notif'));
+					return redirect()->route('users.index')->with('success', __('user.update_notif'));
 				}
 			} else {
 				if ($request->input('password') == '' || $request->input('password') == null) {
@@ -287,10 +203,10 @@ class UsersController extends Controller
 					$user->update($data);
 				}
 
-				return redirect('dashboard/users')->with('flash_message', __('user.update_notif'));
+				return redirect()->route('users.index')->with('success', __('user.update_notif'));
 			}
 		} else {
-			return redirect('forbidden');
+			return abort('404');
 		}
     }
 
@@ -301,15 +217,15 @@ class UsersController extends Controller
      *
      * @return void
      */
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
 		if(Auth::user()->can('delete-users')) {
 			$ids = Hashids::decode($id);
 			User::destroy($ids[0]);
 
-			return redirect('dashboard/users')->with('flash_message', __('user.destroy_notif'));
+			return redirect()->route('users.index')->with('success', __('user.destroy_notif'));
 		} else {
-			return redirect('forbidden');
+			return abort('404');
 		}
     }
 	
@@ -320,45 +236,26 @@ class UsersController extends Controller
      *
      * @return void
      */
-    public function deleteAll(Request $request)
+    public function deleteAll(Request $request): RedirectResponse
     {
 		if(Auth::user()->can('delete-users')) {
-			if ($request->has('id')) {
-				$ids = $request->id;
-				foreach($ids as $id){
-					$idd = Hashids::decode($id);
-					User::destroy($idd[0]);
-				}
-				return redirect('dashboard/users')->with('flash_message', __('user.destroy_notif'));
+			if ($request->has('ids')) {
+				$ids = $request->ids;
+        		User::whereIn('id',explode(",",$ids))->delete();
+				return redirect()->back()->with('success', __('user.destroy_notif'));
 			} else {
-				return redirect('dashboard/users')->with('flash_message', __('user.destroy_error_notif'));
+				return redirect()->route('users.index')->with('error', __('user.destroy_error_notif'));
 			}
 		} else {
-			return redirect('forbidden');
+			return abort('404');
 		}
     }
 	
-	public function getUser(Request $request)
+	public function getUser( $id)
 	{
-		if(Auth::user()->can('read-users')) {
-			$term = trim($request->q);
-
-			if (empty($term)) {
-				$users = User::select('id', 'name')->where([['id', '>', 1],['block', '=', 'N']])->limit(20)->get();
-			} else {
-				$users = User::select('id', 'name')->where([['name', 'LIKE', '%'.$term.'%'],['id', '>', 1],['block', '=', 'N']])->get();
-			}
-
-			$fusers = [];
-
-			foreach ($users as $user) {
-				$fusers[] = ['id' => $user->id, 'text' => $user->name];
-			}
-
-			return \Response::json($fusers);
-		} else {
-			return redirect('forbidden');
-		}
+		//$user = User::find($id);
+		//return response()->json(['data' => $user]);
+        //return response()->json($user);
 	}
 	
 	public function getUserNotMe(Request $request)
@@ -378,9 +275,9 @@ class UsersController extends Controller
 				$fusers[] = ['id' => $user->id, 'text' => $user->name];
 			}
 
-			return \Response::json($fusers);
+			return Response::json($fusers);
 		} else {
-			return redirect('forbidden');
+			return abort('404');
 		}
 	}
 }

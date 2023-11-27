@@ -22,58 +22,12 @@ class ComponentController extends Controller
     public function index(Request $request)
     {
 		if(Auth::user()->can('read-components')) {
-			return view('backend.component.datatable');
+			$components = Component::all();
+			return view('admin.components.datatable', compact('components'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
-	
-	/**
-	 * Displays datatables front end view
-	 *
-	 * @return \Illuminate\View\View
-	 */
-    public function getIndex()
-	{
-		if(Auth::user()->can('read-components')) {
-			return view('components.component.datatable');
-		} else {
-			return redirect('forbidden');
-		}
-	}
-	
-	/**
-	 * Process datatables ajax request.
-	 *
-	 * @return \Illuminate\Http\JsonResponse
-	 */
-	public function anyData()
-	{
-		$components = Component::leftJoin('users', 'users.id', '=', 'components.created_by')
-			->select('components.*', 'users.id as uid', 'users.name as uname');
-		return DataTables::of($components)
-			->addColumn('check', function ($component) {
-				$check = '<div style="text-align:center;">
-					<input type="checkbox" id="titleCheckdel" />
-					<input type="hidden" class="deldata" name="id[]" value="'.Hashids::encode($component->id).'" disabled />
-				</div>';
-				return $check;
-			})
-            ->addColumn('action', function ($component) {
-				$btn = '<div style="text-align:center;"><div class="btn-group">';
-				$btn .= '<a href="'.url('dashboard/'.Str::kebab($component->title).($component->folder == 'gallery' || $component->folder == 'contact' ? 's' : '').'/table').'" class="btn btn-secondary btn-xs btn-icon" title="'.__('general.view').'" data-toggle="tooltip" data-placement="left"><i class="fa fa-eye"></i></a>';
-				$btn .= '<a href="'.url('dashboard/components/'.Hashids::encode($component->id).'/edit').'" class="btn btn-primary btn-xs btn-icon" title="'.__('general.edit').'" data-toggle="tooltip" data-placement="left"><i class="fa fa-edit"></i></a>';
-				$btn .= '<a href="'.url('dashboard/components/'.Hashids::encode($component->id).'').'" class="btn btn-danger btn-xs btn-icon" data-delete="" title="'.__('general.delete').'" data-toggle="tooltip" data-placement="left"><i class="fa fa-trash"></i></a>';
-				$btn .= '</div></div>';
-				return $btn;
-            })
-			->addColumn('control', function ($component) {
-				$check = '<div style="text-align:center;"><a href="javascript:void(0);" class="btn btn-secondary btn-xs btn-icon" data-placement="left"><i class="fa fa-plus"></i></a></div>';
-				return $check;
-			})
-			->escapeColumns([])
-			->make(true);
-	}
 
     /**
      * Show the form for creating a new resource.
@@ -83,9 +37,9 @@ class ComponentController extends Controller
     public function create()
     {
 		if(Auth::user()->can('create-components')) {
-			return view('components.component.create');
+			return view('admin.components.create');
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -114,9 +68,9 @@ class ComponentController extends Controller
 
 			Component::create($requestData);
 			
-			return redirect('dashboard/components')->with('flash_message', __('component.store_notif'));
+			return redirect()->route('components.index')->with('success', __('component.store_notif'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -133,9 +87,9 @@ class ComponentController extends Controller
 			$ids = Hashids::decode($id);
 			$component = Component::findOrFail($ids[0]);
 
-			return view('components.component.show', compact('component'));
+			return view('components.components.show', compact('component'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -152,9 +106,9 @@ class ComponentController extends Controller
 			$ids = Hashids::decode($id);
 			$component = Component::findOrFail($ids[0]);
 
-			return view('components.component.edit', compact('component'));
+			return view('components.components.edit', compact('component'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -185,9 +139,9 @@ class ComponentController extends Controller
 			$component = Component::findOrFail($ids[0]);
 			$component->update($requestData);
 
-			return redirect('dashboard/components')->with('flash_message', __('component.update_notif'));
+			return redirect()->route('components.index')->with('success', __('component.update_notif'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -204,9 +158,9 @@ class ComponentController extends Controller
 			$ids = Hashids::decode($id);
 			Component::destroy($ids[0]);
 
-			return redirect('dashboard/components')->with('flash_message', __('component.destroy_notif'));
+			return redirect()->route('components.index')->with('success', __('component.destroy_notif'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 	
@@ -221,17 +175,14 @@ class ComponentController extends Controller
     {
 		if(Auth::user()->can('delete-components')) {
 			if ($request->has('id')) {
-				$ids = $request->id;
-				foreach($ids as $id){
-					$idd = Hashids::decode($id);
-					Component::destroy($idd[0]);
-				}
-				return redirect('dashboard/components')->with('flash_message', __('component.destroy_notif'));
+				$ids = $request->ids;
+        		Component::whereIn('id',explode(",",$ids))->delete();
+				return redirect()->back()->with('success', __('component.destroy_notif'));
 			} else {
-				return redirect('dashboard/components')->with('flash_message', __('component.destroy_error_notif'));
+				return redirect()->route('components.index')->with('error', __('component.destroy_error_notif'));
 			}
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 	
@@ -240,7 +191,7 @@ class ComponentController extends Controller
 		if(Auth::user()->can('read-components')) {
 			return view('components.component.install');
 		} else {
-			return redirect('forbidden');
+			return  abort('401');
 		}
     }
 	
@@ -272,7 +223,7 @@ class ComponentController extends Controller
 							if($info) {
 								$checkcomponent = Component::where('folder', '=', $info['folder'])->count();
 								if ($checkcomponent > 0) {
-									return back()->with('flash_message', __('component.install_error_notif'));
+									return back()->with('error', __('component.install_error_notif'));
 								} else {
 									Component::create([
 										'title' => $info['title'],
@@ -298,20 +249,20 @@ class ComponentController extends Controller
 									return redirect('dashboard/'.$kebabname.'/install');
 								}
 							} else {
-								return back()->with('flash_message', __('component.install_error_notif'));
+								return back()->with('error', __('component.install_error_notif'));
 							}
 						} else {
-							return back()->with('flash_message', __('component.install_error_notif'));
+							return back()->with('error', __('component.install_error_notif'));
 						}
 					} else {
-						return back()->with('flash_message', __('component.install_error_notif'));
+						return back()->with('error', __('component.install_error_notif'));
 					}
 				}
 			} else {
-				return back()->with('flash_message', __('component.install_error_notif'));
+				return back()->with('error', __('component.install_error_notif'));
 			}
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 	

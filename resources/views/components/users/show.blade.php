@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', __('user.show_title'))
 
 @section('content')
@@ -48,13 +48,13 @@
 					</div>
 				</div>
 				<div class="col-md-3">
-					@if (Auth::user()->picture == '')
-					<img src="{{ asset('po-admin/assets/img/avatar.jpg') }}" class="img-fluid rounded-circle" alt="">
+					@if (Auth::user()->profile_photo_path == null)
+					<img src="{{ asset('admin/assets/img/avatar.jpg') }}" class="img-fluid rounded-circle" alt="">
 					@else
 						@if (Auth::user()->hasRole('member'))
-							<img src="{{ asset('po-content/uploads/users/user-' . Auth::user()->id . '/' . Auth::user()->picture) }}" class="img-fluid rounded-circle" alt="">
+							<img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" class="img-fluid rounded-circle" alt="">
 						@else
-							<img src="{{ asset('po-content/uploads/' . Auth::user()->picture) }}" class="img-fluid rounded-circle" alt="">
+							<img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" class="img-fluid rounded-circle" alt="">
 						@endif
 					@endif
 				</div>

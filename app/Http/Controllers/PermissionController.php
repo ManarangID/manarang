@@ -2,7 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\View\View;
 use Illuminate\Http\Request;
+use Vinkla\Hashids\Facades\Hashids;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use Spatie\Permission\Models\Permission;
 
 class PermissionController extends Controller
 {
@@ -11,72 +16,27 @@ class PermissionController extends Controller
      *
      * @return void
      */
-    public function index(Request $request)
+    public function index(): View
     {
 		if(Auth::user()->can('read-permissions')) {
-			return view('components.permissions.datatable');
+			$permissions = Permission::all();
+			return view('admin.permissions.datatable', compact('permissions'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
-	
-	/**
-	 * Displays datatables front end view
-	 *
-	 * @return \Illuminate\View\View
-	 */
-    public function getIndex()
-	{
-		if(Auth::user()->can('read-permissions')) {
-			return view('backend.permissions.datatable');
-		} else {
-			return redirect('forbidden');
-		}
-	}
-	
-	/**
-	 * Process datatables ajax request.
-	 *
-	 * @return \Illuminate\Http\JsonResponse
-	 */
-	public function anyData()
-	{
-		$permissions = Permission::select('permissions.*');
-		return Datatables::of($permissions)
-			->addColumn('check', function ($permission) {
-				$check = '<div style="text-align:center;">
-					<input type="checkbox" id="titleCheckdel" />
-					<input type="hidden" class="deldata" name="id[]" value="'.Hashids::encode($permission->id).'" disabled />
-				</div>';
-				return $check;
-			})
-            ->addColumn('action', function ($permission) {
-				$btn = '<div style="text-align:center;"><div class="btn-group">';
-				$btn .= '<a href="'.url('dashboard/permissions/'.Hashids::encode($permission->id).'').'" class="btn btn-secondary btn-xs btn-icon" title="'.__('general.view').'" data-toggle="tooltip" data-placement="left"><span class="fa fa-eye"></i></a> ';
-				$btn .= '<a href="'.url('dashboard/permissions/'.Hashids::encode($permission->id).'/edit').'" class="btn btn-primary btn-xs btn-icon" title="'.__('general.edit').'" data-toggle="tooltip" data-placement="left"><span class="fa fa-edit"></i></a> ';
-				$btn .= '<a href="'.url('dashboard/permissions/'.Hashids::encode($permission->id).'').'" class="btn btn-danger btn-xs btn-icon" data-delete="" title="'.__('general.delete').'" data-toggle="tooltip" data-placement="left"><span class="fa fa-trash"></i></a>';
-				$btn .= '</div></div>';
-				return $btn;
-            })
-			->addColumn('control', function ($permission) {
-				$check = '<div style="text-align:center;"><a href="javascript:void(0);" class="btn btn-secondary btn-xs btn-icon"><span class="fa fa-plus"></i></a></div>';
-				return $check;
-			})
-			->escapeColumns([])
-			->make(true);
-	}
 
     /**
      * Show the form for creating a new resource.
      *
      * @return void
      */
-    public function create()
+    public function create(): View
     {
 		if(Auth::user()->can('create-permissions')) {
-			return view('backend.permissions.create');
+			return view('admin.permissions.create');
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -87,7 +47,7 @@ class PermissionController extends Controller
      *
      * @return void
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
 		if(Auth::user()->can('create-permissions')) {
 			$this->validate($request, ['name' => 'required|string|unique:permissions']);
@@ -96,9 +56,9 @@ class PermissionController extends Controller
 			$update = Permission::firstOrCreate(['name' => 'update-'.$request->name]);
 			$delete = Permission::firstOrCreate(['name' => 'delete-'.$request->name]);
 
-			return redirect('dashboard/permissions')->with('flash_message', __('permission.store_notif'));
+			return redirect()->route('permissions.index')->with('success', __('permission.store_notif'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -115,9 +75,9 @@ class PermissionController extends Controller
 			$ids = Hashids::decode($id);
 			$permission = Permission::findOrFail($ids[0]);
 
-			return view('backend.permissions.show', compact('permission'));
+			return view('admin.permissions.show', compact('permission'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -128,15 +88,15 @@ class PermissionController extends Controller
      *
      * @return void
      */
-    public function edit($id)
+    public function edit($id): View
     {
 		if(Auth::user()->can('update-permissions')) {
 			$ids = Hashids::decode($id);
 			$permission = Permission::findOrFail($ids[0]);
 
-			return view('backend.permissions.edit', compact('permission'));
+			return view('admin.permissions.edit', compact('permission'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -148,7 +108,7 @@ class PermissionController extends Controller
      *
      * @return void
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): RedirectResponse
     {
 		if(Auth::user()->can('update-permissions')) {
 			$this->validate($request, ['name' => 'required']);
@@ -157,9 +117,9 @@ class PermissionController extends Controller
 			$permission = Permission::findOrFail($ids[0]);
 			$permission->update($request->all());
 
-			return redirect('dashboard/permissions')->with('flash_message', __('permission.update_notif'));
+			return redirect()->route('permissions.index')->with('success', __('permission.update_notif'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 
@@ -170,15 +130,15 @@ class PermissionController extends Controller
      *
      * @return void
      */
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
 		if(Auth::user()->can('delete-permissions')) {
 			$ids = Hashids::decode($id);
 			Permission::destroy($ids[0]);
 
-			return redirect('dashboard/permissions')->with('flash_message', __('permission.destroy_notif'));
+			return redirect()->route('permissions.index')->with('success', __('permission.destroy_notif'));
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 	
@@ -192,18 +152,15 @@ class PermissionController extends Controller
     public function deleteAll(Request $request)
     {
 		if(Auth::user()->can('delete-permissions')) {
-			if ($request->has('id')) {
-				$ids = $request->id;
-				foreach($ids as $id){
-					$idd = Hashids::decode($id);
-					Permission::destroy($idd[0]);
-				}
-				return redirect('dashboard/permissions')->with('flash_message', __('permission.destroy_notif'));
+			if ($request->has('ids')) {
+				$ids = $request->ids;
+        Permission::whereIn('id',explode(",",$ids))->delete();
+				return redirect()->back()->with('success', __('permission.destroy_notif'));
 			} else {
-				return redirect('dashboard/permissions')->with('flash_message', __('permission.destroy_error_notif'));
+				return redirect()->route('permissions.index')->with('error', __('permission.destroy_error_notif'));
 			}
 		} else {
-			return redirect('forbidden');
+			return abort('401');
 		}
     }
 }

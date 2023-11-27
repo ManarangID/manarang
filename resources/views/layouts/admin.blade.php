@@ -82,13 +82,13 @@
 				<div class="navbar-right pr-3">
 					<div class="dropdown dropdown-profile">
 						<a href="#" class="dropdown-link" data-toggle="dropdown" data-display="static">
-							@if (Auth::user()->picture == '')
+							@if (Auth::user()->profile_photo_path == null)
 							<div class="avatar avatar-sm"><img src="{{ asset('admin/assets/img/avatar.jpg') }}" class="rounded-circle" alt=""></div>
 							@else
 								@if (Auth::user()->hasRole('member'))
-									<div class="avatar avatar-sm"><img src="{{ asset('admin/uploads/users/user-' . Auth::user()->id . '/medium/medium_' . Auth::user()->picture) }}" class="rounded-circle" alt=""></div>
+									<div class="avatar avatar-sm"><img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" class="rounded-circle" alt=""></div>
 								@else
-									<div class="avatar avatar-sm"><img src="{{ asset('admin/uploads/medium/medium_' . Auth::user()->picture) }}" class="rounded-circle" alt=""></div>
+									<div class="avatar avatar-sm"><img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" class="rounded-circle" alt=""></div>
 								@endif
 							@endif
 						</a>

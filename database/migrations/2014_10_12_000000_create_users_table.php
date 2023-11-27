@@ -23,6 +23,8 @@ return new class extends Migration
 			$table->enum('block', ['Y', 'N'])->default('Y');
             $table->foreignId('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();
+			$table->integer('created_by')->default('1');
+			$table->integer('updated_by')->default('1');
             $table->timestamps();
             $table->string('google_id')->nullable();
             $table->string('facebook_id')->nullable();
