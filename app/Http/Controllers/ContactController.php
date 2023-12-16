@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use App\Models\Contact;
 use App\Rules\ReCaptcha;
+use App\Mail\Websitemail;
+use Illuminate\View\View;
 use Illuminate\Http\Request;
+use Vinkla\Hashids\Facades\Hashids;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
 use Artesaos\SEOTools\Facades\SEOTools;
 use Illuminate\Support\Facades\Storage;
@@ -34,7 +40,9 @@ class ContactController extends Controller
     public function index(Request $request)
     {
 		if(Auth::user()->can('read-contacts')) {
-			return view('components.contact.datatable');
+			$contacts = Contact::leftJoin('users', 'users.id', '=', 'contacts.created_by')
+				->select('contacts.*', 'users.id as uid', 'users.name as uname')->get();
+			return view('admin.contacts.datatable', compact('contacts'));
 		} else {
 			return redirect('forbidden');
 		}
@@ -105,7 +113,7 @@ class ContactController extends Controller
     public function create()
     {
 		if(Auth::user()->can('create-contacts')) {
-			return view('components.contact.create');
+			return view('admin.contacts.create');
 		} else {
 			return redirect('forbidden');
 		}
@@ -178,7 +186,7 @@ class ContactController extends Controller
 			$ids = Hashids::decode($id);
 			$contact = Contact::findOrFail($ids[0]);
 
-			return view('components.contact.edit', compact('contact'));
+			return view('admin.contacts.edit', compact('contact'));
 		} else {
 			return redirect('forbidden');
 		}
@@ -261,37 +269,44 @@ class ContactController extends Controller
 		}
     }
 	
-	public function reply($id)
+	public function reply($id): View
     {
 		if(Auth::user()->can('update-contacts')) {
 			$ids = Hashids::decode($id);
 			$contact = Contact::findOrFail($ids[0]);
 
-			return view('components.contact.reply', compact('contact'));
+			return view('admin.contacts.reply', compact('contact'));
 		} else {
 			return redirect('forbidden');
 		}
     }
 	
-	public function postReply(Request $request)
+	public function postReply(Request $request, string $id): RedirectResponse
     {
 		if(Auth::user()->can('create-contacts')) {
+			$ids = Hashids::decode($id);
 			$this->validate($request,[
-				'id' =>  'required',
-				'message' => 'required'
+				'id' => 'required'
 			]);
 
-			$contact = Contact::findOrFail($request->id);
+			$contact = Contact::findOrFail($ids[0]);
+			$post = Post::latest()->limit(5)->get();
+			$contact->status = "Y";
+			$contact->save();
+			$subject = $contact->subject;
+			$message = $request->message;
+
+				Mail::to($contact->email)->send(new Websitemail($subject,$message));
 			
-			Mail::to($contact->email, $contact->name)
-				->queue(new ContactMail([
-					'contact' => $contact,
-					'content' => $request->message
-				]));
+			// Mail::to($contact->email, $contact->name)
+			// 	->queue(new ContactMail([
+			// 		'contact' => $contact,
+			// 		'content' => $request->message
+			// 	]));
 			
-			return redirect('dashboard/contacts')->with('flash_message', __('contact.reply_notif'));
+			return redirect()->route('contacts.index')->with('success', __('contact.reply_notif'));
 		} else {
-			return redirect('forbidden');
+			return abort('forbidden');
 		}
     }
 

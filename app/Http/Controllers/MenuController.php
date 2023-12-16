@@ -226,7 +226,7 @@ class MenuController extends Controller
         		Menu::whereIn('id',explode(",",$ids))->delete();
 				return redirect()->back()->with('success', __('menumanager.destroy_notif'));
 			} else {
-				return redirect('menumanager.index')->with('success', __('menumanager.destroy_error_notif'));
+				return redirect()->route('menumanager.index')->with('error', __('menumanager.destroy_error_notif'));
 			}
 		} else {
 			return redirect('forbidden');

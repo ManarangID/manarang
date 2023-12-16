@@ -7,7 +7,7 @@
 				<form method="POST" action="{{ route('menumanager.destroy', Hashids::encode($menu->id)) }}"> @csrf
                     <input name="_method" type="hidden" value="DELETE">
 					<div class="btn-group btn-group-xs">
-						<a href="{{ url('menumanager/'.Hashids::encode($menu->id).'/edit') }}" class="btn btn-primary btn-xs btn-icon" title="{{ __('general.edit') }}" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"></i></a>
+						<a href="{{ route('menumanager.edit', Hashids::encode($menu->id)) }}" class="btn btn-primary btn-xs btn-icon" title="{{ __('general.edit') }}" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"></i></a>
 						<button type="submit" class="btn btn-danger btn-xs btn-icon" data-toggle="tooltip" title='Delete'><i class="fas fa-trash"></i></button>
 					</div>
 				</form>
@@ -22,7 +22,7 @@
 				<form method="POST" action="{{ route('menumanager.destroy', Hashids::encode($menu->id)) }}"> @csrf
                     <input name="_method" type="hidden" value="DELETE">
 					<div class="btn-group btn-group-xs">
-						<a href="{{ url('menumanager/'.Hashids::encode($menu->id).'/edit') }}" class="btn btn-primary btn-xs btn-icon" title="{{ __('general.edit') }}" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"></i></a> 
+						<a href="{{ route('menumanager.edit', Hashids::encode($menu->id)) }}" class="btn btn-primary btn-xs btn-icon" title="{{ __('general.edit') }}" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"></i></a> 
 						<button type="submit" class="btn btn-danger btn-xs btn-icon" data-toggle="tooltip" title='Delete'><i class="fas fa-trash"></i></button>
 					</div>
 				</form>

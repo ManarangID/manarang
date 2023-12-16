@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('galleries', function (Blueprint $table) {
+        Schema::create('gallerys', function (Blueprint $table) {
             $table->increments('id');
 			$table->integer('album_id')->nullable();
 			$table->string('title')->nullable();

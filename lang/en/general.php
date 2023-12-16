@@ -63,9 +63,12 @@ return [
 	'check_all' => 'Check All',
 	'delete_selected' => 'Delete Selected',
 	'select_file' => 'Select File',
+	'drop_file' => 'Drop files here to upload',
+	'max_file' => 'Maximum file size allowed for upload 1MB',
 	'selected' => 'Selected',
 	'filemanager' => 'File Manager',
 	'notification' => 'Notification',
 	'message' => 'Message',
+	'show' => 'Show',
 
 ];

@@ -44,5 +44,8 @@ return [
 	'error_gallery' => 'Error add picture gallery. Please check again!',
 	'notification' => 'Notification',
 	'type' => 'Type',
+	'general' => 'General',
+	'pagination' => 'Pagination',
+	'video' => 'Video',
 
 ];

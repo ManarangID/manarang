@@ -25,6 +25,7 @@ return new class extends Migration
 			$table->enum('active', ['Y', 'N'])->default('Y');
 			$table->enum('headline', ['Y', 'N'])->default('Y');
 			$table->enum('comment', ['Y', 'N'])->default('Y');
+			$table->enum('subscribe', ['Y', 'N'])->default('N');
 			$table->integer('hits')->default('1');
             $table->string('slug')->unique();
 			$table->integer('created_by')->default('1');

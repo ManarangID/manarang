@@ -28,6 +28,7 @@ return [
 	'email' => 'Email',
 	'subject' => 'Subject',
 	'message' => 'Message',
+	'answer' => 'Answer',
 	'status' => 'Status',
 	'read' => 'Read',
 	'unread' => 'Unread',

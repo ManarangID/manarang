@@ -13,12 +13,14 @@ use App\Models\Gallery;
 use App\Models\Component;
 use Illuminate\View\View;
 use App\Models\Categories;
+use App\Models\PostGallery;
 use Illuminate\Http\Request;
 use Spatie\Analytics\Period;
 use Illuminate\Http\Response;
 use Spatie\Analytics\Analytics;
 use Illuminate\Support\Facades\Auth;
 use Artesaos\SEOTools\Facades\SEOTools;
+use Illuminate\Support\Facades\Storage;
 
 class HomeController extends Controller
 {
@@ -49,17 +51,17 @@ class HomeController extends Controller
 		SEOTools::opengraph()->setDescription(getSetting('web_description'));
 		SEOTools::opengraph()->setUrl(getSetting('web_url'));
 		SEOTools::opengraph()->setSiteName(getSetting('web_author'));
-		SEOTools::opengraph()->addImage(asset('po-content/uploads/'.getSetting('logo')));
+		SEOTools::opengraph()->addImage(asset(Storage::url('images/'.getSetting('logo'))));
 		SEOTools::twitter()->setSite('@'.$twitterid[count($twitterid)-1]);
 		SEOTools::twitter()->setTitle(getSetting('web_name'));
 		SEOTools::twitter()->setDescription(getSetting('web_description'));
 		SEOTools::twitter()->setUrl(getSetting('web_url'));
-		SEOTools::twitter()->setImage(asset('po-content/uploads/'.getSetting('logo')));
+		SEOTools::twitter()->setImage(asset(Storage::url('images/'.getSetting('logo'))));
 		SEOTools::jsonLd()->setTitle(getSetting('web_name'));
 		SEOTools::jsonLd()->setDescription(getSetting('web_description'));
 		SEOTools::jsonLd()->setType('WebPage');
 		SEOTools::jsonLd()->setUrl(getSetting('web_url'));
-		SEOTools::jsonLd()->setImage(asset('po-content/uploads/'.getSetting('logo')));
+		SEOTools::jsonLd()->setImage(asset(Storage::url('images/'.getSetting('logo'))));
 		
         return view(getTheme('home'));
     }
@@ -75,17 +77,17 @@ class HomeController extends Controller
 		SEOTools::opengraph()->setDescription(getSetting('web_description'));
 		SEOTools::opengraph()->setUrl(getSetting('web_url') . '/404');
 		SEOTools::opengraph()->setSiteName(getSetting('web_author'));
-		SEOTools::opengraph()->addImage(asset('po-content/uploads/'.getSetting('logo')));
+		SEOTools::opengraph()->addImage(asset(Storage::url('images/'.getSetting('logo'))));
 		SEOTools::twitter()->setSite('@'.$twitterid[count($twitterid)-1]);
 		SEOTools::twitter()->setTitle('Not Found - '.getSetting('web_name'));
 		SEOTools::twitter()->setDescription(getSetting('web_description'));
 		SEOTools::twitter()->setUrl(getSetting('web_url') . '/404');
-		SEOTools::twitter()->setImage(asset('po-content/uploads/'.getSetting('logo')));
+		SEOTools::twitter()->setImage(asset(Storage::url('images/'.getSetting('logo'))));
 		SEOTools::jsonLd()->setTitle('Not Found - '.getSetting('web_name'));
 		SEOTools::jsonLd()->setDescription(getSetting('web_description'));
 		SEOTools::jsonLd()->setType('WebPage');
 		SEOTools::jsonLd()->setUrl(getSetting('web_url') . '/404');
-		SEOTools::jsonLd()->setImage(asset('po-content/uploads/'.getSetting('logo')));
+		SEOTools::jsonLd()->setImage(asset(Storage::url('images/'.getSetting('logo'))));
 		
 		return response()->view(getTheme('404'), [], 404);
 	}
@@ -263,4 +265,36 @@ class HomeController extends Controller
 			return $deviceRow;
 		});
 	}
+	
+
+
+    /**
+     * Generate Image upload View
+     *
+     * @return void
+     */
+    public function dropzone()
+    {
+        return view('components.subscriber.index');
+    }
+
+
+    /**
+     * Image Upload Code
+     *
+     * @return void
+     */
+    public function dropzoneStore(Request $request)
+    {
+        $image = $request->file('file');
+        $imageName = time().$image->getClientOriginalName();
+		$filename = pathinfo($imageName, PATHINFO_FILENAME);
+        $image->move(public_path('storage/post/gallery'),$imageName);
+
+		$imageUpload = new PostGallery();
+        $imageUpload->title = $filename;
+        $imageUpload->picture = $imageName;
+        $imageUpload->save();
+        return response()->json(['success'=>$imageName]);
+    }
 }

@@ -122,51 +122,43 @@
                         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <!-- Add icons to the links using the .nav-icon class
                             with font-awesome or any other icon font library -->
-                            <li class="nav-header">GENERAL</li>
+                            <li class="nav-header">{{ __('general.content') }}</li>
                             <li class="nav-item">
                                 <a href="/dashboard" class="nav-link {{ (request()->is('dashboard')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>
-                                    Dashboard
+                                {{ __('general.dashboard') }}
                                 </p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="/pages" class="nav-link {{ (request()->is('pages')) ? 'active' : '' }}">
+                                <a href="{{route('posts.index')}}" class="nav-link {{ (request()->is('dashboard/posts')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-newspaper"></i>
+                                <p>
+                                {{ __('general.posts') }}
+                                </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{route('categories.index')}}" class="nav-link {{ (request()->is('dashboard/categories')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-folder-open"></i>
+                                <p>
+                                {{ __('general.categories') }}
+                                </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{route('pages.index')}}" class="nav-link {{ (request()->is('dashboard/pages')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-copy"></i>
                                 <p>
-                                    Pages
+                                {{ __('general.pages') }}
                                     <span class="badge badge-info right">6</span>
-                                </p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="/posts" class="nav-link {{ (request()->is('dashboard')) ? 'posts' : '' }}">
-                                <i class="nav-icon fas fa-newspaper"></i>
-                                <p>
-                                    Posts
-                                </p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="/categories" class="nav-link {{ (request()->is('categories')) ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-newspaper"></i>
-                                <p>
-                                    Categories
-                                </p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="/gallerys" class="nav-link {{ (request()->is('gallerys')) ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-images"></i>
-                                <p>
-                                    Gallery
                                 </p>
                                 </a>
                             </li>
                             <li class="nav-header">{{ __('general.appearance') }}</li>
                             <li class="nav-item">
-                                <a href="{{ route('users.index') }}" class="nav-link">
+                                <a href="{{ route('themes.index') }}" class="nav-link {{ (request()->is('dashboard/themes')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-desktop"></i>
                                 <p>
                                     {{ __('general.themes') }}
@@ -174,7 +166,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('menumanager.index') }}" class="nav-link">
+                                <a href="{{ route('menumanager.index') }}" class="nav-link {{ (request()->is('dashboard/menumanager')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-bars"></i>
                                 <p>
                                     {{ __('general.menu_manager') }}
@@ -182,7 +174,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('settings.group') }}" class="nav-link">
+                                <a href="{{ route('settings.group') }}" class="nav-link {{ (request()->is('dashboard/settings')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-cogs"></i>
                                 <p>
                                     {{ __('general.settings') }}
@@ -190,8 +182,8 @@
                                 </a>
                             </li>
                             <li class="nav-header">{{ __('general.component') }}</li>
-                            <li class="nav-item {{ (request()->is('subscriber/all')||request()->is('subscriber/compose')) ? 'menu-open' : '' }}">
-                                <a href="#" class="nav-link {{ (request()->is('subscriber/all')||request()->is('subscriber/compose')) ? 'active' : '' }}">
+                            <li class="nav-item {{ (request()->is('dashboard/subscribers')) ? 'menu-open' : '' }}">
+                                <a href="#" class="nav-link {{ (request()->is('dashboard/subscribers/all')) ? 'active' : '' }}">
                                 <i class="nav-icon far fa-envelope"></i>
                                 <p>
                                     Subscriber
@@ -200,13 +192,13 @@
                                 </a>
                                 <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="/subscriber/all" class="nav-link {{ (request()->is('subscriber/all')) ? 'active' : '' }}">
+                                    <a href="{{ route('subscribers.index') }}" class="nav-link {{ (request()->is('dashboard/subscribers')) ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>All Subscriber</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="/subscriber/compose" class="nav-link {{ (request()->is('subscriber/compose')) ? 'active' : '' }}">
+                                    <a href="{{ route('subscribers.create') }}" class="nav-link {{ (request()->is('dashboard/subscribers/create')) ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Compose</p>
                                     </a>
@@ -220,7 +212,23 @@
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('components.index') }}" class="nav-link">
+                                <a href="{{route('albums.index')}}" class="nav-link {{ (request()->is('dashboard/albums')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-images"></i>
+                                <p>
+                                {{ __('general.albums') }}
+                                </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{route('contacts.index')}}" class="nav-link {{ (request()->is('dashboard/contacts')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-inbox"></i>
+                                <p>
+                                {{ __('general.contacts') }}
+                                </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('components.index') }}" class="nav-link {{ (request()->is('dashboard/components')) ? 'active' : '' }}">
                                 <i class="nav-icon far fa-folder"></i>
                                 <p>
                                     {{ __('general.component') }}
@@ -229,7 +237,7 @@
                             </li>
                             <li class="nav-header">{{ __('general.user') }}</li>
                             <li class="nav-item">
-                                <a href="{{ route('users.index') }}" class="nav-link">
+                                <a href="{{ route('users.index') }}" class="nav-link {{ (request()->is('dashboard/users')) ? 'active' : '' }}">
                                 <i class="nav-icon far fa-user"></i>
                                 <p>
                                     {{ __('general.users') }}
@@ -237,7 +245,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('roles.index') }}" class="nav-link">
+                                <a href="{{ route('roles.index') }}" class="nav-link {{ (request()->is('dashboard/roles')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-users-cog"></i>
                                 <p>
                                     {{ __('general.roles') }}
@@ -245,7 +253,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('permissions.index') }}" class="nav-link">
+                                <a href="{{ route('permissions.index') }}" class="nav-link {{ (request()->is('dashboard/permissions')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-user-shield"></i>
                                 <p>
                                     {{ __('general.permissions') }}

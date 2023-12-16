@@ -143,7 +143,7 @@
                 if (confirm("Are you sure?")) {
                     var stuId = studentIdArr.join(",");
                     $.ajax({
-                        url: "{{url('deleteallsettings')}}",
+                        url: "{{url('dashboard/deleteallsettings')}}",
                         type: 'DELETE',
                         method: 'POST',
                         headers: {

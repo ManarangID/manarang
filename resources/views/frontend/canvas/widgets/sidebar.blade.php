@@ -30,7 +30,7 @@
 										<div class="entry-meta">
 											<ul>
 												<li><i class="icon-line-eye"></i> {{ $popularPost->hits }} Views</li>
-												<li><i class="icon-news"></i> {{ $post->ctitle }}</li>
+												<li><i class="icon-news"></i> {{ $popularPost->ctitle }}</li>
 											</ul>
 										</div>
 									</div>

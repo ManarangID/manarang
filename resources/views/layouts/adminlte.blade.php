@@ -178,7 +178,7 @@
         <script>
         $(function () {
             // Summernote
-            $('#summernote').summernote({
+            $('#content').summernote({
             height: 500,
             focus: true
             })

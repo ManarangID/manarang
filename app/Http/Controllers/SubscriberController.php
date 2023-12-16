@@ -8,6 +8,7 @@ use App\Mail\Websitemail;
 use App\Models\Subscriber;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
 use Spatie\FlareClient\Http\Response;
@@ -20,7 +21,7 @@ class SubscriberController extends Controller
     public function index()
     {
         $subscribers = Subscriber::where('status','Active')->get();
-        return view('components.subscriber.subscriber', compact('subscribers'));
+        return view('admin.subscriber.datatable', compact('subscribers'));
     }
 
     public function store(Request $request)
@@ -84,7 +85,7 @@ class SubscriberController extends Controller
         return view('components.subscriber.compose');
     }
 
-    public function send_email_subscriber(Request $request)
+    public function composeMail(Request $request)
     {
         $request->validate([
             'subject' => 'required',
@@ -114,5 +115,27 @@ class SubscriberController extends Controller
         }
 
         return redirect()->back()->with('success', 'Email is Sent Successfully.');
+    }
+	
+	/**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     *
+     * @return void
+     */
+    public function deleteAll(Request $request)
+    {
+		if(Auth::user()->can('delete-subscribes')) {
+			if ($request->has('ids')) {
+				$ids = $request->ids;
+                Subscriber::whereIn('id',explode(",",$ids))->delete();
+				return redirect()->route('subscribers.index')->with('success', __('subsribe.destroy_notif'));
+			} else {
+				return redirect()->route('subscribers.index')->with('error', __('subscribe.destroy_error_notif'));
+			}
+		} else {
+			return redirect('401');
+		}
     }
 }

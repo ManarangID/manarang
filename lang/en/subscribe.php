@@ -28,5 +28,8 @@ return [
 	'unfollow' => 'Unfollow',
 	'created_at' => 'Date & Time',
 	'send_notif' => 'Thanks for subscribe us. We will get in touch with you shortly.',
+	'send_new_post' => 'Latest news has been sent to subscribers',
+	'send_new_post_error' => 'Unable sent news to subscribers',
+	'compose' => 'Compose New Message',
 
 ];

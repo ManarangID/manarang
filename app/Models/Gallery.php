@@ -33,7 +33,7 @@ class Gallery extends Model
      *
      * @var string
      */
-    protected $table = 'galleries';
+    protected $table = 'gallerys';
 
     /**
      * The database primary key value.

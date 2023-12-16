@@ -2,17 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use Mail;
 use Carbon\Carbon;
+use App\Models\Tag;
 use App\Models\Post;
 use App\Models\Comment;
+use App\Mail\Websitemail;
+use Illuminate\View\View;
 use App\Models\Categories;
+use App\Models\Subscriber;
 use App\Models\PostGallery;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Http\Requests\PostRequest;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Vinkla\Hashids\Facades\Hashids;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Artesaos\SEOTools\Facades\SEOTools;
 use Illuminate\Support\Facades\Storage;
@@ -24,22 +32,54 @@ use Intervention\Image\Facades\Image as ResizeImage;
 
 class PostController extends Controller
 {
+	/**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+		config([
+			'captcha.secret' => getSetting('recaptcha_secret'),
+			'captcha.sitekey' => getSetting('recaptcha_key'),
+		]);
+		
+        // $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(): View
     {
-        $posts = Post::join('categories', 'posts.category_id', '=', 'categories.id')->select('posts.*', 'categories.title as categoryTitle')->orderBy('id','desc')->get();
-        return response(view('components.posts.index', ['posts' => $posts]));
+		if(Auth::user()->can('read-posts')) {
+			if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('admin')) {
+				$posts = Post::leftJoin('categories', 'categories.id', '=', 'posts.category_id')
+					->leftJoin('users', 'users.id', '=', 'posts.created_by')
+					->select('posts.*', 'categories.id as cid', 'categories.title as ctitle', 'users.id as uid', 'users.name as uname', 'users.profile_photo_path as profile')->get();
+			} else {
+				$posts = Post::leftJoin('categories', 'categories.id', '=', 'posts.category_id')
+					->leftJoin('users', 'users.id', '=', 'posts.created_by')
+					->where('posts.created_by', '=', Auth::user()->id)
+					->select('posts.*', 'categories.id as cid', 'categories.title as ctitle', 'users.id as uid', 'users.name as uname', 'users.profile_photo_path as profile')->get();
+			}
+			return view('admin.posts.datatable', compact('posts'));
+		} else {
+			return redirect('forbidden');
+		}
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): Response
+    public function create(): View
     {
-        $categories = Categories::all();
-        return response(view('components.posts.create', ['categories' => $categories]));
+		if(Auth::user()->can('create-posts')) {
+			$categorys = Categories::where('active', '=', 'Y')->get()->toArray();
+			
+			return view('admin.posts.create', compact('categorys'));
+		} else {
+			return redirect('forbidden');
+		}
     }
 
     /**
@@ -47,40 +87,88 @@ class PostController extends Controller
      */
     public function store(PostRequest $request): RedirectResponse
     {
-        $validated = $request->validated();
-        if ($request->picture != null){
-            //upload image
-            $path = public_path('storage/post/');
-            $pathThumbnail = public_path('storage/post/thumbnail/');
-            !is_dir($path) && mkdir($path, 0777, true);
-            !is_dir($pathThumbnail) && mkdir($pathThumbnail, 0777, true);
+		if(Auth::user()->can('create-posts')) {
+			$this->validate($request,[
+				'category_id' => 'required',
+				'title' => 'required',
+				'seotitle' => 'required|string|unique:posts',
+				'type' => 'required',
+				'active' => 'required',
+				'headline' => 'required',
+				'comment' => 'required'
+			]);
 
-            $name = $request->picture->hashName();
-            ResizeImage::make($request->file('picture'))->resize(1280, 720)->save($path . $name);
-  
-            /**
-             * Generate Thumbnail Image Upload on Folder Code
-             */
-            ResizeImage::make($request->file('picture'))->resize(48, 48)->save($pathThumbnail . $name);
+			$request->request->add([
+				'created_by' => Auth::User()->id,
+				'updated_by' => Auth::User()->id
+			]);
+			$requestData = $request->all();
 
-            $validated['picture'] = $name;
-            $validated['created_by'] = auth()->user()->id;;
-            $validated['updated_by'] = auth()->user()->id;;
-        }
-        Post::create($validated); 
-        
-        return redirect(route('posts'))->with('success', 'Added!');
+			//upload image
+			if ($request->hasFile('picture')){
+				$path = public_path('storage/post/');
+				$pathThumbnail = public_path('storage/post/thumbnail/');
+				!is_dir($path) && mkdir($path, 0777, true);
+				!is_dir($pathThumbnail) && mkdir($pathThumbnail, 0777, true);
+	
+				$name = $request->picture->hashName();
+				ResizeImage::make($request->file('picture'))->resize(1280, 720)->save($path . $name);
+				ResizeImage::make($request->file('picture'))->resize(48, 48)->save($pathThumbnail . $name);
+	
+					$requestData['picture'] = "$name";
+			}
+			Post::create($requestData);
+			
+			$breaktags = explode(',', $request->tag);
+			$totaltags = count($breaktags);
+			if ($totaltags > 0) {
+				for($i=0; $i<$totaltags; $i++){
+					$checktag = Tag::where('seotitle', '=', Str::slug($breaktags[$i], '-'))->count();
+					if($checktag > 0) {
+						Tag::where('seotitle', '=', Str::slug($breaktags[$i], '-'))->update([
+							'count' => DB::raw('count+1'),
+							'updated_by' => Auth::User()->id
+						]);
+					} else {
+						Tag::create([
+							'title' => $breaktags[$i],
+							'seotitle' => Str::slug($breaktags[$i], '-'),
+							'created_by' => Auth::User()->id,
+							'updated_by' => Auth::User()->id
+						]);
+					}
+				}
+			}
+			
+			return redirect()->route('posts.index')->with('success', __('post.store_notif'));
+		} else {
+			return redirect('forbidden');
+		}
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id): Response
+    public function edit(string $id): View
     {
-        $posts = Post::findOrFail($id);
-        $categories = Categories::all();
-        $category_id = Categories::where('id', '$post->category_id')->get();
-        return response(view('components.posts.edit', ['posts' => $posts,'categories' => $categories]));
+		if(Auth::user()->can('update-posts')) {
+			$ids = Hashids::decode($id);
+			$post = Post::findOrFail($ids[0]);
+			$post_gallerys = PostGallery::where('post_id', '=', $post->id)->get();
+			$categorys = Categories::where('active', '=', 'Y')->get()->toArray();
+			
+			if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('admin')) {
+				return view('admin.posts.edit', compact('post', 'post_gallerys' ,'categorys'));
+			} else {
+				if ($post->created_by == Auth::user()->id) {
+					return view('admin.posts.edit', compact('post', 'post_gallerys' ,'categorys'));
+				} else {
+					return redirect('forbidden');
+				}
+			}
+		} else {
+			return redirect('forbidden');
+		}
     }
 
     /**
@@ -88,72 +176,67 @@ class PostController extends Controller
      */
     public function update(Request $request, string $id): RedirectResponse
     {
-        //validate form
-        $this->validate($request, [
-            'picture'     => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'title'     => 'required|min:5',
-            'seotitle'   => 'required|min:5'
-        ]);
+		if(Auth::user()->can('update-posts')) {
+			$ids = Hashids::decode($id);
+			$this->validate($request,[
+				'category_id' => 'required',
+				'title' => 'required',
+				'seotitle' => 'required|string|unique:posts,seotitle,' . $ids[0],
+				'type' => 'required',
+				'active' => 'required',
+				'headline' => 'required',
+				'comment' => 'required'
+			]);
+			$request->request->add([
+				'updated_by' => Auth::User()->id
+			]);
+			$requestData = $request->all();
 
-        //get posts by ID
-        $posts = Post::findOrFail($id);
-        if ($request->hasFile('picture')) {
-            //delete old image
-            Storage::delete('public/post/'.$posts->picture);
-            Storage::delete('public/post/thumbnail/'.$posts->picture);
-            //upload image
-            // $picture = $request->file('picture');
-            // $picture->storeAs('public/post', $picture->hashName());
-            $path = public_path('storage/post/');
-            $pathThumbnail = public_path('storage/post/thumbnail/');
-            !is_dir($path) && mkdir($path, 0777, true);
-            !is_dir($pathThumbnail) && mkdir($pathThumbnail, 0777, true);
+			$post = Post::findOrFail($ids[0]);
 
-            $name = $request->picture->hashName();
-            ResizeImage::make($request->file('picture'))->resize(1280, 720)->save($path . $name);
-  
-            /**
-             * Generate Thumbnail Image Upload on Folder Code
-             */
-            ResizeImage::make($request->file('picture'))->resize(48, 48)->save($pathThumbnail . $name);
+			//upload image
+			if ($request->hasFile('picture')){
+				//delete old image
+				Storage::delete('public/post/'.$post->picture);
+				Storage::delete('public/post/thumbnail/'.$post->picture);
+				$path = public_path('storage/post/');
+				$pathThumbnail = public_path('storage/post/thumbnail/');
+				!is_dir($path) && mkdir($path, 0777, true);
+				!is_dir($pathThumbnail) && mkdir($pathThumbnail, 0777, true);
+	
+				$name = $request->picture->hashName();
+				ResizeImage::make($request->file('picture'))->resize(1280, 720)->save($path . $name);
+				ResizeImage::make($request->file('picture'))->resize(48, 48)->save($pathThumbnail . $name);
+	
+					$requestData['picture'] = "$name";
+			}
+			$post->update($requestData);
+			
+			$breaktags = explode(',', $request->tag);
+			$totaltags = count($breaktags);
+			if ($totaltags > 0) {
+				for($i=0; $i<$totaltags; $i++){
+					$checktag = Tag::where('seotitle', '=', Str::slug($breaktags[$i], '-'))->count();
+					if($checktag > 0) {
+						Tag::where('seotitle', '=', Str::slug($breaktags[$i], '-'))->update([
+							'count' => DB::raw('count+1'),
+							'updated_by' => Auth::User()->id
+						]);
+					} else {
+						Tag::create([
+							'title' => $breaktags[$i],
+							'seotitle' => Str::slug($breaktags[$i], '-'),
+							'created_by' => Auth::User()->id,
+							'updated_by' => Auth::User()->id
+						]);
+					}
+				}
+			}
 
-            $posts->update([
-                'title'     => $request->title,
-                'seotitle'     => $request->seotitle,
-                'content'     => $request->content,
-                'meta_description'     => $request->meta_description,
-                'picture'     => $name,
-                'picture_description'     => $request->picture_description,
-                'tag'     => $request->tag,
-                'type'     => $request->type,
-                'active'     => $request->active,
-                'headline'     => $request->headline,
-                'comment'     => $request->comment,
-                'category_id'     => $request->category_id,
-                'updated_by' => auth()->user()->id,
-                'active'     => $request->active,
-                'updated_at'     => Carbon::now()
-            ]);
-        }else{
-            //update post without image
-            $posts->update([
-                'title'     => $request->title,
-                'seotitle'     => $request->seotitle,
-                'content'     => $request->content,
-                'meta_description'     => $request->meta_description,
-                'picture_description'     => $request->picture_description,
-                'tag'     => $request->tag,
-                'type'     => $request->type,
-                'active'     => $request->active,
-                'headline'     => $request->headline,
-                'comment'     => $request->comment,
-                'category_id'     => $request->category_id,
-                'updated_by' => auth()->user()->id,
-                'active'     => $request->active,
-                'updated_at'     => Carbon::now()
-            ]);
-        }
-        return redirect()->route('posts')->with(['success' => 'Data Berhasil Diubah!']);
+			return redirect()->route('posts.index')->with('success', __('post.update_notif'));
+		} else {
+			return redirect('forbidden');
+		}
     }
 
     /**
@@ -171,23 +254,147 @@ class PostController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     *
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function destroy(string $id): RedirectResponse
+    public function destroy($id): RedirectResponse
     {
-        $posts = Post::findOrFail($id);
+		if(Auth::user()->can('delete-posts')) {
+			$ids = Hashids::decode($id);
+			if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('admin')) {
+				Post::destroy($ids[0]);
+			} else {
+				$post = Post::findOrFail($ids[0]);
+				
+				if ($post->created_by == Auth::user()->id) {
+					Post::destroy($ids[0]);
+				} else {
+					return redirect('forbidden');
+				}
+			}
 
-        Storage::delete('public/post/'.$posts->picture);
-        if ($posts->delete()) {
-            return redirect(route('posts'))->with('success', 'Deleted!');
-        }
+			return redirect()->route('posts.index')->with('success', __('post.destroy_notif'));
+		} else {
+			return redirect('forbidden');
+		}
+    }
+	
+	/**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     *
+     * @return void
+     */
+    public function deleteAll(Request $request): RedirectResponse
+    {
+		if(Auth::user()->can('delete-posts')) {
+			if ($request->has('ids')) {
+				$ids = $request->ids;
+					if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('admin')) {
+						Post::whereIn('id',explode(",",$ids))->delete();
+					} else {
+						$post = Post::findOrFail($ids[0]);
+						
+						if ($post->created_by == Auth::user()->id) {
+							Post::whereIn('id',explode(",",$ids))->delete();
+						} else {
+							return redirect('forbidden');
+						}
+					}
+				return redirect()->route('posts.index')->with('success', __('post.destroy_notif'));
+			} else {
+				return redirect()->route('posts.index')->with('error', __('post.destroy_error_notif'));
+			}
+		} else {
+			return redirect('forbidden');
+		}
+    }
+	
+	public function createGallery(Request $request)
+    {
+		if(Auth::user()->can('create-posts')) {
+			$image = $request->file('file');
+			$imageName = time().$image->getClientOriginalName();
+			$filename = pathinfo($imageName, PATHINFO_FILENAME);
+			$image->move(public_path('storage/post/gallery'),$imageName);
+	
+			$imageUpload = new PostGallery();
+			$imageUpload->post_id = $request->input('post_id');
+			$imageUpload->title = $request->input('title');
+			$imageUpload->picture = $imageName;
+			$imageUpload->save();
+			return response()->json(['success'=>$imageName]);
+		}
+    }
+	
+	public function deleteGallery(Request $request)
+    {
+		if(Auth::user()->can('delete-posts')) {
+			$ids = Hashids::decode($request->id);
+			$gallery = PostGallery::findOrFail($ids[0]);
+			Storage::delete('public/post/gallery/'.$gallery->picture);
+			PostGallery::destroy($ids[0]);
+			
+			$result = array(
+				'code' => '2000',
+				'message' => 'Success',
+				'data' => []
+			);
+			
+			return \Response::json($result);
+		} else {
+			$result = array(
+				'code' => '4004',
+				'message' => 'Error',
+				'data' => []
+			);
+			
+			return \Response::json($result);
+		}
+    }
 
-        return redirect(route('posts'))->with('error', 'Sorry, unable to delete this!');
+    /**
+     * Send new post to subscriber
+     *
+     * @param  int  $id
+     *
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+				*Post::findOrFail($idd[0])->update(['subscribe'=> "Y"]);
+     */
+    public function sendSubscriber(string $id): RedirectResponse
+    {
+		if(Auth::user()->can('read-posts')) {
+			$idd = Hashids::decode($id);
+			$posts = Post::findOrFail($idd[0]);
+			if ($posts->active=="N"){
+				return redirect()->back()->with('error', __('subscribe.send_new_post_error'));
+			}else{
+				$posts->subscribe = "Y";
+				$posts->save();
+				$subject = $posts->title;
+				$message = '<a href="'.config('app.url').'/posts/'.$posts->seotitle.'">'.$posts->title.'</a>'.'<br>'.
+							'<img src="'.config('app.url').'/storage/posts/'.$posts->picture.'"/>'.'<br>'
+							.$posts->content;
+	
+				$subscribers = Subscriber::where('status','Active')->get();
+				foreach($subscribers as $row) {
+					Mail::to($row->email)->send(new Websitemail($subject,$message));
+				}
+	
+				return redirect()->back()->with('success', __('subscribe.send_new_post'));
+			}
+		} else {
+			return redirect()->route('posts.index')->with('error', __('subscribe.send_new_post_error'));
+		}
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($seotitle, Request $request): Response
+    public function detail($seotitle, Request $request): Response
     {
         if(getSetting('slug') == 'post/slug-id') {
 			$expseotitle = explode('-', $seotitle);
@@ -247,21 +454,21 @@ class PostController extends Controller
 			SEOTools::opengraph()->setDescription($post->meta_description);
 			SEOTools::opengraph()->setUrl(getSetting('web_url') . $seturl);
 			SEOTools::opengraph()->setSiteName(getSetting('web_author'));
-			SEOTools::opengraph()->addImage($post->picture == '' ? asset('po-content/uploads/'.getSetting('logo')) : getPicture($post->picture, null, $post->updated_by));
+			SEOTools::opengraph()->addImage($post->picture == '' ? asset(Storage::url('images/'.getSetting('logo'))) : getPicture($post->picture, null, $post->updated_by));
 			SEOTools::twitter()->setSite('@'.$twitterid[count($twitterid)-1]);
 			SEOTools::twitter()->setTitle($post->title.' - '.getSetting('web_name'));
 			SEOTools::twitter()->setDescription($post->meta_description);
 			SEOTools::twitter()->setUrl(getSetting('web_url') . $seturl);
-			SEOTools::twitter()->setImage($post->picture == '' ? asset('po-content/uploads/'.getSetting('logo')) : getPicture($post->picture, null, $post->updated_by));
+			SEOTools::twitter()->setImage($post->picture == '' ? asset(Storage::url('images/'.getSetting('logo'))) : getPicture($post->picture, null, $post->updated_by));
 			SEOTools::jsonLd()->setTitle($post->title.' - '.getSetting('web_name'));
 			SEOTools::jsonLd()->setDescription($post->meta_description);
 			SEOTools::jsonLd()->setType('WebPage');
 			SEOTools::jsonLd()->setUrl(getSetting('web_url') . $seturl);
-			SEOTools::jsonLd()->setImage($post->picture == '' ? asset('po-content/uploads/'.getSetting('logo')) : getPicture($post->picture, null, $post->updated_by));
+			SEOTools::jsonLd()->setImage($post->picture == '' ? asset(Storage::url('images/'.getSetting('logo'))) : getPicture($post->picture, null, $post->updated_by));
 			
 			return response(view(getTheme('detailpost'), compact('post', 'content', 'paginator', 'gallery')));
 		} else {
-			return redirect('404');
+			return abort('404');
 		}
     }
 	
@@ -317,17 +524,17 @@ class PostController extends Controller
 			SEOTools::opengraph()->setDescription($post->meta_description);
 			SEOTools::opengraph()->setUrl(getSetting('web_url') . $seturl);
 			SEOTools::opengraph()->setSiteName(getSetting('web_author'));
-			SEOTools::opengraph()->addImage($post->picture == '' ? asset('po-content/uploads/'.getSetting('logo')) : getPicture($post->picture, null, $post->updated_by));
+			SEOTools::opengraph()->addImage($post->picture == '' ? asset(Storage::url('images/'.getSetting('logo'))) : getPicture($post->picture, null, $post->updated_by));
 			SEOTools::twitter()->setSite('@'.$twitterid[count($twitterid)-1]);
 			SEOTools::twitter()->setTitle($post->title.' - '.getSetting('web_name'));
 			SEOTools::twitter()->setDescription($post->meta_description);
 			SEOTools::twitter()->setUrl(getSetting('web_url') . $seturl);
-			SEOTools::twitter()->setImage($post->picture == '' ? asset('po-content/uploads/'.getSetting('logo')) : getPicture($post->picture, null, $post->updated_by));
+			SEOTools::twitter()->setImage($post->picture == '' ? asset(Storage::url('images/'.getSetting('logo'))) : getPicture($post->picture, null, $post->updated_by));
 			SEOTools::jsonLd()->setTitle($post->title.' - '.getSetting('web_name'));
 			SEOTools::jsonLd()->setDescription($post->meta_description);
 			SEOTools::jsonLd()->setType('WebPage');
 			SEOTools::jsonLd()->setUrl(getSetting('web_url') . $seturl);
-			SEOTools::jsonLd()->setImage($post->picture == '' ? asset('po-content/uploads/'.getSetting('logo')) : getPicture($post->picture, null, $post->updated_by));
+			SEOTools::jsonLd()->setImage($post->picture == '' ? asset(Storage::url('images/'.getSetting('logo'))) : getPicture($post->picture, null, $post->updated_by));
 			
 			return view(getTheme('detailpost'), compact('post', 'content', 'paginator', 'gallery'));
 		} else {
@@ -357,17 +564,17 @@ class PostController extends Controller
 		SEOTools::opengraph()->setDescription($terms.' - '.getSetting('web_description'));
 		SEOTools::opengraph()->setUrl(getSetting('web_url') . '/search');
 		SEOTools::opengraph()->setSiteName(getSetting('web_author'));
-		SEOTools::opengraph()->addImage(asset('po-content/uploads/'.getSetting('logo')));
+		SEOTools::opengraph()->addImage(asset(Storage::url('images/'.getSetting('logo'))));
 		SEOTools::twitter()->setSite('@'.$twitterid[count($twitterid)-1]);
 		SEOTools::twitter()->setTitle($terms.' - '.getSetting('web_name'));
 		SEOTools::twitter()->setDescription($terms.' - '.getSetting('web_description'));
 		SEOTools::twitter()->setUrl(getSetting('web_url') . '/search');
-		SEOTools::twitter()->setImage(asset('po-content/uploads/'.getSetting('logo')));
+		SEOTools::twitter()->setImage(asset(Storage::url('images/'.getSetting('logo'))));
 		SEOTools::jsonLd()->setTitle($terms.' - '.getSetting('web_name'));
 		SEOTools::jsonLd()->setDescription($terms.' - '.getSetting('web_description'));
 		SEOTools::jsonLd()->setType('WebPage');
 		SEOTools::jsonLd()->setUrl(getSetting('web_url') . '/search');
-		SEOTools::jsonLd()->setImage(asset('po-content/uploads/'.getSetting('logo')));
+		SEOTools::jsonLd()->setImage(asset(Storage::url('images/'.getSetting('logo'))));
 		
 		$posts = Post::leftJoin('users', 'users.id', 'posts.created_by')
 			->leftJoin('categories', 'categories.id', 'posts.category_id')

@@ -87,6 +87,31 @@ if (!function_exists('getPicturepages')) {
 	}
 }
 
+if (!function_exists('getPicturegallery')) {
+	function getPicturegallery($name, $type, $user)
+    {
+		if ($type == 'medium') {
+			if (file_exists('po-content/uploads/medium/medium_'.$name)) {
+				return asset('po-content/uploads/medium/medium_'.$name);
+			} else {
+				return asset('po-content/uploads/users/user-'.$user.'/medium/medium_'.$name);
+			}
+		} elseif ($type == 'thumb') {
+			if (file_exists(Storage::url('gallery/thumbnail/'.$name))) {
+				return asset(Storage::url('gallery/thumbnail/'.$name));
+			} else {
+				return asset(Storage::url('gallery/thumbnail/'.$name));
+			}
+		} else {
+			if (file_exists(Storage::url('gallery/'.$name))) {
+				return asset(Storage::url('gallery/'.$name));
+			} else {
+				return asset(Storage::url('gallery/'.$name));
+			}
+		}
+	}
+}
+
 if (!function_exists('getPictureuser')) {
 	function getPictureuser($name, $type, $user)
     {
@@ -372,11 +397,11 @@ if (!function_exists('getTag')) {
 if (!function_exists('latestGallery')) {
 	function latestGallery($limit, $offset = '0')
 	{
-		$result = Gallery::leftJoin('users', 'users.id', 'galleries.created_by')
-			->leftJoin('albums', 'albums.id', 'galleries.album_id')
+		$result = Gallery::leftJoin('users', 'users.id', 'gallerys.created_by')
+			->leftJoin('albums', 'albums.id', 'gallerys.album_id')
 			->where('albums.active', '=', 'Y')
-			->select('galleries.*', 'albums.title as atitle', 'albums.seotitle as aseotitle', 'users.name')
-			->orderBy('galleries.id', 'desc')
+			->select('gallerys.*', 'albums.title as atitle', 'albums.seotitle as aseotitle', 'users.name')
+			->orderBy('gallerys.id', 'desc')
 			->limit($limit)
 			->offset($offset)
 			->get();

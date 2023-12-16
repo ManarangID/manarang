@@ -62,7 +62,7 @@ class Categories extends Model
 	}
 	
 	public function mainParent() {
-		return $this->hasOne('App\Models\Category', 'id', 'parent');
+		return $this->hasOne('App\Models\Categories', 'id', 'parent');
 	}
 
 	public function children() {

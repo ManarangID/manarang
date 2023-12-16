@@ -35,7 +35,7 @@ return [
 	'install' => 'Install',
 	'files' => 'Files (.zip)',
 	'instruction_1' => 'Component Installation',
-	'instruction_2' => 'Upload the .zip component file which can be downloaded via POPOJI official website or from a trusted developer.',
+	'instruction_2' => 'Upload the .zip component file which can be downloaded via ManarangID official website or from a trusted developer.',
 	'instruction_3' => 'The system will automatically install the component files that you need.',
 	'instruction_4' => 'If an error occurs, please repeat the steps from the beginning. If there are the same components, the system will not run the installation process.',
 	'instruction_5' => 'A standard component contains files migration, controller, model, view and route.',

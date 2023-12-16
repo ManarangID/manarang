@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Component;
+use Illuminate\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
@@ -10,6 +11,7 @@ use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Artisan;
 
 class ComponentController extends Controller
@@ -19,7 +21,7 @@ class ComponentController extends Controller
      *
      * @return void
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
 		if(Auth::user()->can('read-components')) {
 			$components = Component::all();
@@ -34,7 +36,7 @@ class ComponentController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function create()
+    public function create(): View
     {
 		if(Auth::user()->can('create-components')) {
 			return view('admin.components.create');
@@ -50,7 +52,7 @@ class ComponentController extends Controller
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
 		if(Auth::user()->can('create-components')) {
 			$this->validate($request,[
@@ -100,13 +102,13 @@ class ComponentController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function edit($id)
+    public function edit(string $id): View
     {
 		if(Auth::user()->can('update-components')) {
 			$ids = Hashids::decode($id);
 			$component = Component::findOrFail($ids[0]);
 
-			return view('components.components.edit', compact('component'));
+			return view('admin.components.edit', compact('component'));
 		} else {
 			return abort('401');
 		}
@@ -120,7 +122,7 @@ class ComponentController extends Controller
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): RedirectResponse
     {
 		if(Auth::user()->can('update-components')) {
 			$ids = Hashids::decode($id);
@@ -139,7 +141,7 @@ class ComponentController extends Controller
 			$component = Component::findOrFail($ids[0]);
 			$component->update($requestData);
 
-			return redirect()->route('components.index')->with('success', __('component.update_notif'));
+			return redirect()->route('admin.components.index')->with('success', __('component.update_notif'));
 		} else {
 			return abort('401');
 		}

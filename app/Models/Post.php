@@ -48,7 +48,7 @@ class Post extends Model
      * @var array
      */
     protected $fillable = [
-		'category_id', 'title', 'seotitle', 'content', 'meta_description', 'picture', 'picture_description', 'tag', 'type', 'active', 'headline', 'comment', 'hits', 'created_by', 'updated_by'
+		'category_id', 'title', 'seotitle', 'content', 'meta_description', 'picture', 'picture_description', 'tag', 'type', 'active', 'headline', 'comment', 'subscribe', 'hits', 'created_by', 'updated_by'
 	];
 	
 	public function createdBy()
